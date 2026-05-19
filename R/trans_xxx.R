@@ -116,7 +116,26 @@ trans_linear_nexpsm <- function(
 }
 
 
-
+#
+# Specifying an interactive single index transformation
+# 
+#' @rdname trans_xxx
+#' @export trans_inter_linear
+#'
+trans_inter_linear <- function(
+    pord = NULL, 
+    S = NULL, 
+    alpha = NULL, 
+    a0 = NULL
+){
+  
+  out <- lapply(as.list(match.call())[-1], eval, envir = parent.frame())
+  
+  out$type <- "inter_linear" 
+  
+  return(out)
+  
+}
 
 
 
