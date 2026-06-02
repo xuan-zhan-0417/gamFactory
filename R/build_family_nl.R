@@ -6,7 +6,7 @@
 #' 
 #' 
 
-build_family_nl <- function(bundle, info, lamVar = 1e5, lamRidge = 1e-5){
+build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge = 1e-5){
   
   available_deriv <- min(bundle$available_deriv, 3)
   cdf <- bundle$cdf
@@ -131,6 +131,26 @@ build_family_nl <- function(bundle, info, lamVar = 1e5, lamRidge = 1e-5){
       olp <- linpreds(eff = eff, iel = info$iel, iec = info$iec)
       olp <- olp$eval(param = coef, deriv = derLev)
       
+      # # --------------------------------------------------------------------
+      # # --------------- start check for gradient and Hessian ---------------
+      # # ----------------- (g1, g2 in olp$eff[[i]]$store) -------------------
+      # # --------------------------------------------------------------------
+      # i_nes <- .get_nested_index(info)
+      # si_extra <- info$extra[[i_nes]]$si
+      # check.deriv.g <- si_extra$check_deriv
+      # if (isTRUE(check.deriv.g)) {
+      #   res <- check_g_derivatives_fd(olp,
+      #                                 h1 = 1e-6,   # step for gradient
+      #                                 h2 = 2e-4,   # step for Hessian
+      #                                 verbose = TRUE, # if compare the mean value of gradient/Hessian
+      #                                 per_sample = TRUE) # if check each sample's gradient/Hessian
+      # }
+      # 
+      # 
+      # # --------------------------------------------------------------------
+      # # --------------- end check for gradient and Hessian ---------------
+      # # --------------------------------------------------------------------
+      
       # Evaluate effect-specific (not smoothing) penalties and their derivatives
       pen <- gamFactory:::.eval_penalties(eff = olp$eff, info = info, d1b = d1b, deriv = derLev, outer = outDer)
       pen_ridge <- gamFactory:::.eval_ridge_penalties(eff = olp$eff, info = info, deriv = derLev)
@@ -138,6 +158,12 @@ build_family_nl <- function(bundle, info, lamVar = 1e5, lamRidge = 1e-5){
       # Evaluate eta and mu
       etas <- olp$f
       mus <- lapply(1:np, function(.kk) family$linfo[[.kk]]$linkinv( etas[[.kk]] ))
+      
+      #❗️❗️test code start
+      if (!is.null(y_true)) {
+        plot(mus[[1]], y_true); abline(0,1) # For checking
+      }
+      #❗️❗️test code end
       
       # Derivatives of llk w.r.t. mu
       DllkDmu <- llkFam(y = y, param = mus, deriv = derLev)
@@ -191,7 +217,7 @@ build_family_nl <- function(bundle, info, lamVar = 1e5, lamRidge = 1e-5){
         }
         
       }
-      
+    
       if (!is.null(drop)) {
         #remove column
         ret$lb <- ret$lb[-drop]
@@ -199,7 +225,7 @@ build_family_nl <- function(bundle, info, lamVar = 1e5, lamRidge = 1e-5){
         
         drop <- NULL
       }
-      
+
       return( ret )
       
     } ## end ll 

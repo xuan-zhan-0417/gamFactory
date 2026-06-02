@@ -1,26 +1,44 @@
-.wrap_2d_nested_basis <- function(basis1, basis2, di_total) {
-  force(basis1); force(basis2); force(di_total)
+.wrap_2d_nested_basis <- function(b1, b2){
   
-  evalX <- function(x1, x2, deriv = 0) {
-    withCallingHandlers({
-      # marginal value
-      o1 <- basis1$evalX(x = x1, deriv = deriv)
-      o2 <- basis2$evalX(x = x2, deriv = deriv)
-      
-      #Row-wise Kronecker
-      X_2D_pred <- mgcv::tensor.prod.model.matrix(list(o1$X0, o2$X0))
-      X_2D_pred <- cbind(o1$X0, o2$X0, X_2D_pred)
+  force(b1); force(b2)
 
+  evalX <- function(z, t, deriv = 0){
+
+    out1 <- b1$evalX(x = z, deriv = deriv) 
+    out2 <- b2$evalX(x = t, deriv = 0)
+    X2_0 <- out2$X0 
+    
+    n <- length(z)
+    p2 <- ncol(X2_0)
+    
+    out_2d <- list()
+    
+    for(ii in 0:deriv){
+      name <- paste0("X", ii)
+      X1_d <- out1[[name]]
       
-      # only return X0, should have X1, X2,... ideally
-      return(list(X0 = X_2D_pred))
-      
-    }, warning = function(w) {
-      if (length(grep("there is \\*no\\* information about some basis coefficients", conditionMessage(w)))) {
-        invokeRestart("muffleWarning")
+      if(ii == 0){
+        # ---------------------------------------------------------
+        # deriv = 0: [X1_0, X2_0, X1_0 ⊙ X2_0]
+        # ---------------------------------------------------------
+        X_inter <- mgcv::tensor.prod.model.matrix(list(X1_d, X2_0))
+        out_2d[[name]] <- cbind(X1_d, X2_0, X_inter)
+        
+      } else {
+        # ---------------------------------------------------------
+        # Gradient (X1), Hessian (X2) 
+        # [X1_d, 0, X1_d ⊙ X2_0]
+        # ---------------------------------------------------------
+        # X2_d = 0
+        X2_d <- matrix(0, nrow = n, ncol = p2)
+        X_inter_d <- mgcv::tensor.prod.model.matrix(list(X1_d, X2_0))
+        out_2d[[name]] <- cbind(X1_d, X2_d, X_inter_d)
       }
-    })
+    }
+    
+    return(out_2d)
   }
   
-  return(list("evalX" = evalX))
+  out <- list("evalX" = evalX)
+  return(out)
 }

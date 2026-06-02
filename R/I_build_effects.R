@@ -22,12 +22,12 @@
         
       } else if(effType[ii] == "si_nexpsm.nested"){
         eff[[ii]] <- eff_si_nexp(
-          X_si    = extra$si$X_si,
-          X_nexp    = extra$si$X_nexp,
-          basis = extra$basis,
-          times = extra$si$times,
+          X_si        = extra$si$X_si,
+          X_nexp      = extra$si$X_nexp,
+          basis       = extra$basis,
+          times       = extra$si$times,
           alpha_center = extra$si$alpha_center,
-          Z0    = extra$si$Z0,
+          Z0          = extra$si$Z0,
           positive_si = extra$si$positive_si
         )
         
@@ -44,6 +44,14 @@
           y     = extra$si$x,
           dist  = extra$si$dist,
           basis = extra$basis
+        )
+        
+      } else if(effType[ii] == "inter_linear.nested"){
+        eff[[ii]] <- eff_inter(
+          Xi    = Xi,
+          t     = extra$si$t,
+          basis = extra$basis,
+          a0    = extra$si$a0
         )
         
       } else {

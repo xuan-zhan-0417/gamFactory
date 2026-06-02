@@ -54,8 +54,8 @@ postproc_gam_nl <- function(o, info) {
     }
   }
   
-  o$linear.predictors <- predict.gamnl(o, type = "link")
-  o$fitted.values     <- predict.gamnl(o, type = "response")
+  o$linear.predictors <- predict.gamnl(o, type = "link", newdata = o$model)
+  o$fitted.values     <- predict.gamnl(o, type = "response", newdata = o$model)
   
   return(o)
 }
