@@ -2,10 +2,10 @@
 % Please edit documentation in R/smooth_construct_inter_linear_smooth_spec.R
 \name{smooth.construct.inter_linear.smooth.spec}
 \alias{smooth.construct.inter_linear.smooth.spec}
-\title{交互型 Single Index 平滑效应的 construct 函数}
+\title{Nested single-index in tensor product}
 \usage{
 \method{smooth.construct}{inter_linear.smooth.spec}(object, data, knots)
 }
 \description{
-交互型 Single Index 平滑效应的 construct 函数
+Nested single-index in tensor product
 }

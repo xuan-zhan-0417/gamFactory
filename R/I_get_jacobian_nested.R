@@ -86,7 +86,7 @@ get_jacobian.nested <- function(object,data, param){
   
   JJ <- cbind(drop(store$X1 %*% beta) * x_nest$xa_da, # df/da = M1%*%b * ds/da
               store$X0) # df/db = Ma
-  return(list("JJ" = JJ, "xa" = NULL) )
+  return(list("JJ" = JJ, "xa" = x_nest$xa) )
 }
 
 

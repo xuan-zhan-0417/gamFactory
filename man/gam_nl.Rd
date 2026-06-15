@@ -10,6 +10,7 @@ gam_nl(
   data = list(),
   fit = TRUE,
   sp = NULL,
+  y_true = NULL,
   ...
 )
 }
