@@ -6,7 +6,7 @@
 #' 
 #' 
 
-build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge = 1e-5){
+build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge = 1e-2){
   
   available_deriv <- min(bundle$available_deriv, 3)
   cdf <- bundle$cdf
@@ -87,6 +87,8 @@ build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge 
                           np = np, 
                           nam = nam)
     
+    it <- 0L 
+    
     ll <- function(y, X, coef, wt, family, offset=NULL, deriv=0, d1b=0, d2b=0, Hp=NULL, rank=0, fh=NULL, D=NULL) {
       ## function defining a gamlss model log lik. 
       ## deriv: 0 - eval
@@ -159,11 +161,11 @@ build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge 
       etas <- olp$f
       mus <- lapply(1:np, function(.kk) family$linfo[[.kk]]$linkinv( etas[[.kk]] ))
       
-      #❗️❗️test code start
-      if (!is.null(y_true)) {
-        plot(mus[[1]], y_true); abline(0,1) # For checking
-      }
-      #❗️❗️test code end
+      # #❗️❗️test code start
+      # if (!is.null(y_true)) {
+      #   plot(mus[[1]], y_true); abline(0,1) # For checking
+      # }
+      # #❗️❗️test code end
       
       # Derivatives of llk w.r.t. mu
       DllkDmu <- llkFam(y = y, param = mus, deriv = derLev)
@@ -217,7 +219,29 @@ build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge 
         }
         
       }
-    
+      ## ================================================================================
+      ## ======================= check_coef (every 10 iteration)===========================
+      ## ================================================================================
+      if (it %% 10 == 0) {
+      # si_extra <- info$extra[[3]]$si
+      cat("alpha_si in coef:", coef[2:4],"\n")
+      cat("beta in coef:", coef[5:10],"\n")
+      
+      cat("llk before penalty:", ll0,"\n")
+      cat("llk after penalty:", ret$l,"\n")
+      
+      z <- info$extra[[3]]$si$X %*% coef[2:4]
+      cat("mean of z:", mean(z), "\n")
+      cat("var of z:", var(z), "\n")
+      
+      true_alpha <- c(0.8728716, -0.4364358,  0.2182179)
+      plot(true_alpha, coef[2:4])
+      }
+      it <<- it + 1L
+      ## ================================================================================
+      ## ===================== check_coef end ============================
+      ## ================================================================================
+      
       if (!is.null(drop)) {
         #remove column
         ret$lb <- ret$lb[-drop]
