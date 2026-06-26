@@ -170,8 +170,6 @@ build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge 
       # Derivatives of llk w.r.t. mu
       DllkDmu <- llkFam(y = y, param = mus, deriv = derLev)
       
-      ll0 <- drop(crossprod(wt, DllkDmu$d0))  #  log-lik without penalty
-      
       ret <- list("l" = drop(crossprod(wt, DllkDmu$d0)))
       
       # Add penalties to likelihood
@@ -219,28 +217,34 @@ build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge 
         }
         
       }
-      ## ================================================================================
-      ## ======================= check_coef (every 10 iteration)===========================
-      ## ================================================================================
-      if (it %% 10 == 0) {
-      # si_extra <- info$extra[[3]]$si
-      cat("alpha_si in coef:", coef[2:4],"\n")
-      cat("beta in coef:", coef[5:10],"\n")
-      
-      cat("llk before penalty:", ll0,"\n")
-      cat("llk after penalty:", ret$l,"\n")
-      
-      z <- info$extra[[3]]$si$X %*% coef[2:4]
-      cat("mean of z:", mean(z), "\n")
-      cat("var of z:", var(z), "\n")
-      
+      # ================================================================================
+      # ======================= check_coef (every 10 iteration)===========================
+      # ================================================================================
+      if (it %% 1 == 0) {
+      # # si_extra <- info$extra[[3]]$si
+      # cat("intercept 1:", coef[1], "\n")
+      # cat("alpha_si in coef:", coef[2:4],"\n")
+      cat("coef:", coef,"\n")
+      # cat("intercept 2:", coef[20], "\n")
+        
+      # ll0 <- drop(crossprod(wt, DllkDmu$d0))
+      # cat("llk before penalty:", ll0,"\n")
+      # cat("penalty:", ll0 - ret$l,"\n")
+      # cat("llk after penalty:", ret$l,"\n")
+      cat("==================================")
+      cat("\n")
+
+      # z <- info$extra[[3]]$si$X %*% coef[2:4]
+      # cat("mean of z:", mean(z), "\n")
+      # cat("var of z:", var(z), "\n")
+
       true_alpha <- c(0.8728716, -0.4364358,  0.2182179)
       plot(true_alpha, coef[2:4])
       }
       it <<- it + 1L
-      ## ================================================================================
-      ## ===================== check_coef end ============================
-      ## ================================================================================
+      # ================================================================================
+      # ===================== check_coef end ============================
+      # ================================================================================
       
       if (!is.null(drop)) {
         #remove column

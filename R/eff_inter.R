@@ -43,19 +43,39 @@ eff_inter <- function(Xi, t, basis, a0 = NULL){
       }
     }
     
-    # # =================== check f1,f2,f3 ===========================================
+    # # # =================== check f1,f2,f3 ===================
+    # n_check <- min(20, length(ax))
     # 
-    # chk <- gamFactory:::check_wrap_z_deriv_numDeriv_mean(
-    #   Xi = Xi,
-    #   t = t,
-    #   basis = basis,
-    #   param = param,
-    #   a0 = a0,
-    #   deriv = 3,
-    #   method = "Richardson"
-    # )
+    # f1_results <- matrix(NA, nrow = n_check, ncol = 2, dimnames = list(NULL, c("EX", "FD")))
+    # f2_results <- matrix(NA, nrow = n_check, ncol = 2, dimnames = list(NULL, c("EX", "FD")))
+    # f3_results <- matrix(NA, nrow = n_check, ncol = 2, dimnames = list(NULL, c("EX", "FD")))
     # 
-    # chk
+    # for (i in 1:n_check) {
+    # 
+    #   mock_obj <- list(
+    #     d0 = function(zi) { drop(basis$evalX(z = zi, t = t[i], deriv = 0)$X0 %*% beta) },
+    #     d1 = function(zi) { drop(basis$evalX(z = zi, t = t[i], deriv = 1)$X1 %*% beta) },
+    #     d2 = function(zi) { drop(basis$evalX(z = zi, t = t[i], deriv = 2)$X2 %*% beta) },
+    #     d3 = function(zi) { drop(basis$evalX(z = zi, t = t[i], deriv = 3)$X3 %*% beta) }
+    #   )
+    # 
+    #   res <- check_deriv(obj = mock_obj, param = ax[i], ord = 1:deriv)
+    #   
+    #   if (deriv >= 1) f1_results[i, ] <- res$fd1
+    #   if (deriv >= 2) f2_results[i, ] <- res$fd2
+    #   if (deriv >= 3) f3_results[i, ] <- res$fd3
+    # }
+    # 
+    # 
+    # if (deriv >= 1) {
+    #   print(f1_results)
+    # }
+    # if (deriv >= 2) {
+    #   print(f2_results)
+    # }
+    # if (deriv >= 3) {
+    #   print(f3_results)
+    # }
     # # ==============================================================
 
     o <- eff_inter(Xi = Xi, t = t, basis = basis, a0 = a0)

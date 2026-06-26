@@ -16,6 +16,9 @@
   # Loss
   l0 <- (vhat - v)^2 
   
+  # cat("alpha:", a,"\n")
+  # cat("penalty on variance:",l0,"\n")
+
   l1 <- l2 <- l3 <- NULL
   if( deriv ){
     n <- nrow(x)
