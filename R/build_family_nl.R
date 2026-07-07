@@ -133,26 +133,6 @@ build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge 
       olp <- linpreds(eff = eff, iel = info$iel, iec = info$iec)
       olp <- olp$eval(param = coef, deriv = derLev)
       
-      # # --------------------------------------------------------------------
-      # # --------------- start check for gradient and Hessian ---------------
-      # # ----------------- (g1, g2 in olp$eff[[i]]$store) -------------------
-      # # --------------------------------------------------------------------
-      # i_nes <- .get_nested_index(info)
-      # si_extra <- info$extra[[i_nes]]$si
-      # check.deriv.g <- si_extra$check_deriv
-      # if (isTRUE(check.deriv.g)) {
-      #   res <- check_g_derivatives_fd(olp,
-      #                                 h1 = 1e-6,   # step for gradient
-      #                                 h2 = 2e-4,   # step for Hessian
-      #                                 verbose = TRUE, # if compare the mean value of gradient/Hessian
-      #                                 per_sample = TRUE) # if check each sample's gradient/Hessian
-      # }
-      # 
-      # 
-      # # --------------------------------------------------------------------
-      # # --------------- end check for gradient and Hessian ---------------
-      # # --------------------------------------------------------------------
-      
       # Evaluate effect-specific (not smoothing) penalties and their derivatives
       pen <- gamFactory:::.eval_penalties(eff = olp$eff, info = info, d1b = d1b, deriv = derLev, outer = outDer)
       pen_ridge <- gamFactory:::.eval_ridge_penalties(eff = olp$eff, info = info, deriv = derLev)
@@ -177,6 +157,7 @@ build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge 
       if( npen ){
         for(ii in 1:npen){
           ret$l <- ret$l - lamVar * pen[[ii]]$d0 - lamRidge * pen_ridge[[ii]]$d0
+          
         }
       }
       
@@ -223,23 +204,29 @@ build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge 
       if (it %% 1 == 0) {
       # # si_extra <- info$extra[[3]]$si
       # cat("intercept 1:", coef[1], "\n")
+      # cat("lamVar:", lamVar, "\n")
+      # cat("pen[[ii]]$d0:", pen[[1]]$d0, "\n")
+      # cat("pen_var:", lamVar * pen[[ii]]$d0, "\n" )
+      # cat("lamRidge:", lamRidge, "\n")
+      # cat("pen_ridge[[ii]]$d0:", pen_ridge[[ii]]$d0, "\n")
+      # cat("pen_ridge:",lamRidge * pen_ridge[[ii]]$d0 , "\n")
       # cat("alpha_si in coef:", coef[2:4],"\n")
-      cat("coef:", coef,"\n")
+      # cat("coef:", coef,"\n")
       # cat("intercept 2:", coef[20], "\n")
         
       # ll0 <- drop(crossprod(wt, DllkDmu$d0))
       # cat("llk before penalty:", ll0,"\n")
       # cat("penalty:", ll0 - ret$l,"\n")
       # cat("llk after penalty:", ret$l,"\n")
-      cat("==================================")
-      cat("\n")
+      # cat("==================================")
+      # cat("\n")
 
       # z <- info$extra[[3]]$si$X %*% coef[2:4]
-      # cat("mean of z:", mean(z), "\n")
+      # # # cat("mean of z:", mean(z), "\n")
       # cat("var of z:", var(z), "\n")
-
-      true_alpha <- c(0.8728716, -0.4364358,  0.2182179)
-      plot(true_alpha, coef[2:4])
+      # 
+      # true_alpha <- c(0.8, -0.4, 0.2)
+      # plot(true_alpha, coef[2:4])
       }
       it <<- it + 1L
       # ================================================================================
@@ -250,7 +237,7 @@ build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge 
         #remove column
         ret$lb <- ret$lb[-drop]
         ret$lbb <- ret$lbb[-drop, -drop, drop = FALSE]
-        
+
         drop <- NULL
       }
 

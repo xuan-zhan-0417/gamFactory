@@ -92,7 +92,7 @@ smooth.construct.inter_linear.smooth.spec <- function(object, data, knots){
   ax <- drop( si$X %*% (si$alpha + si$a0) ) 
   data[[term_x]] <- ax
   out <- .build_n_inter_bspline_basis(object = object, data = data, knots = knots, si = si)
-
+  
   # =========================================================================
   # assemble penalty matrix
   # =========================================================================
@@ -114,6 +114,12 @@ smooth.construct.inter_linear.smooth.spec <- function(object, data, knots){
   }
   
   class(out) <- c("inter_linear", "nested")
+  
+  # # #debug on reparameter
+  # out$S[[1]] <- as.matrix(Matrix::bdiag(diag(0,3),diag(1,18)))
+  # # out$S[[2]] <- as.matrix(Matrix::bdiag(diag(0,3),diag(0,18),)) #coef inverse
+  # # out$S[[2]] <- NULL #correct coef
+  # # #debug on reparameter
   
   return( out )
 }
