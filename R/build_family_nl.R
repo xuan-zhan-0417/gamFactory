@@ -6,7 +6,7 @@
 #' 
 #' 
 
-build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge = 1e-2){
+build_family_nl <- function(bundle, info, lamVar = 1e5, lamRidge = 1e-2){
   
   available_deriv <- min(bundle$available_deriv, 3)
   cdf <- bundle$cdf
@@ -87,7 +87,7 @@ build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge 
                           np = np, 
                           nam = nam)
     
-    it <- 0L 
+    # it <- 0L 
     
     ll <- function(y, X, coef, wt, family, offset=NULL, deriv=0, d1b=0, d2b=0, Hp=NULL, rank=0, fh=NULL, D=NULL) {
       ## function defining a gamlss model log lik. 
@@ -201,7 +201,7 @@ build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge 
       # ================================================================================
       # ======================= check_coef (every 10 iteration)===========================
       # ================================================================================
-      if (it %% 1 == 0) {
+      # if (it %% 3 == 0) {
       # # si_extra <- info$extra[[3]]$si
       # cat("intercept 1:", coef[1], "\n")
       # cat("lamVar:", lamVar, "\n")
@@ -222,13 +222,13 @@ build_family_nl <- function(y_true = NULL, bundle, info, lamVar = 1e5, lamRidge 
       # cat("\n")
 
       # z <- info$extra[[3]]$si$X %*% coef[2:4]
-      # # # cat("mean of z:", mean(z), "\n")
+      # cat("mean of z:", mean(z), "\n")
       # cat("var of z:", var(z), "\n")
       # 
       # true_alpha <- c(0.8, -0.4, 0.2)
       # plot(true_alpha, coef[2:4])
-      }
-      it <<- it + 1L
+      # }
+      # it <<- it + 1L
       # ================================================================================
       # ===================== check_coef end ============================
       # ================================================================================
