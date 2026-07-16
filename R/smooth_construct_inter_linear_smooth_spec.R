@@ -9,7 +9,7 @@
 smooth.construct.inter_linear.smooth.spec <- function(object, data, knots){
   
   # =========================================================================
-  # 1：initialise si
+  # initialise si
   # =========================================================================
   if(length(object$term) != 2) {
     stop("The smooth effect must contain exactly two terms: the multivariate matrix and the time variable.")
@@ -25,12 +25,14 @@ smooth.construct.inter_linear.smooth.spec <- function(object, data, knots){
   # =========================================================================
   Xi <- data[[term_x]]
   t_vec <- data[[term_t]]
+  
   t_mean <- mean(t_vec)
   data[[term_t]] <- t_vec - t_mean
   si$t <- data[[term_t]]
   si$tm <- t_mean 
+  
   Xi <- scale(Xi, scale = FALSE)
-  si$xm <- attr(Xi, "scaled:center") 
+  si$xm <- attr(Xi, "scaled:center") #overwrite data[[term_x]] later
   
   di <- ncol(Xi)
   n <- nrow(Xi)

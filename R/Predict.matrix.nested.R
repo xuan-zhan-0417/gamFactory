@@ -23,6 +23,9 @@ Predict.matrix.nested <- function(object, data, ...){
   if(class(object)[1] == "inter_linear"){
     return( .predict.matrix.inter_linear(object, data, ...) )
   }
+  if(class(object)[1] == "inter_nexp"){
+    return( .predict.matrix.inter_nexp(object, data, ...) )
+  }
   
   stop("Predict.matrix.nested --- I do not know this effect type")
   

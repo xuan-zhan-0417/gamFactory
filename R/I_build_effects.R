@@ -47,14 +47,23 @@
         )
         
       } else if(effType[ii] == "inter_linear.nested"){
-        eff[[ii]] <- eff_inter(
+        eff[[ii]] <- eff_inter_linear(
           Xi    = Xi,
           t     = extra$si$t,
           basis = extra$basis,
           a0    = extra$si$a0
         )
         
-      } else {
+      } else if(effType[ii] == "inter_nexp.nested"){
+        eff[[ii]] <- eff_inter_nexp(
+          y     = extra$si$x_raw,
+          Xi    = Xi,
+          t     = extra$si$t,
+          basis = extra$basis
+        )
+        
+      }
+      else {
         stop("Don't know this effect type")
       }
     }

@@ -87,7 +87,7 @@ build_family_nl <- function(bundle, info, lamVar = 1e5, lamRidge = 1e-2){
                           np = np, 
                           nam = nam)
     
-    # it <- 0L 
+    # it <- 0L
     
     ll <- function(y, X, coef, wt, family, offset=NULL, deriv=0, d1b=0, d2b=0, Hp=NULL, rank=0, fh=NULL, D=NULL) {
       ## function defining a gamlss model log lik. 
@@ -225,7 +225,7 @@ build_family_nl <- function(bundle, info, lamVar = 1e5, lamRidge = 1e-2){
       # cat("mean of z:", mean(z), "\n")
       # cat("var of z:", var(z), "\n")
       # 
-      # true_alpha <- c(0.8, -0.4, 0.2)
+      # true_alpha <- c(1, 2, 3)
       # plot(true_alpha, coef[2:4])
       # }
       # it <<- it + 1L

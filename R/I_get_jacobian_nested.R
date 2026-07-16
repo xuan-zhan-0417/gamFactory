@@ -16,7 +16,9 @@ get_jacobian.nested <- function(object,data, param){
   if(class(object)[1] == "inter_linear"){
     return(.get.jacobian.inter_linear(object, data, param))
   }
-  
+  if(class(object)[1] == "inter_nexp"){ 
+    return(.get.jacobian.inter_nexp(object, data, param))
+  }
   stop("I do not know this effect type")
   
 }
@@ -89,9 +91,23 @@ get_jacobian.nested <- function(object,data, param){
   return(list("JJ" = JJ, "xa" = x_nest$xa) )
 }
 
-
-
-
+.get.jacobian.inter_nexp <- function(object, data, param){
+  
+  na <- length(object$xt$si$alpha)
+  # Single index and spline coefficients
+  beta <- param[ -(1:na) ]
+  
+  x_nest <- Predict.matrix.nested(object, data = data, get.xa = TRUE)
+  
+  store <- object$xt$basis$evalX(z = x_nest$xa, t = object$xt$si$t, deriv = 1)
+  X1beta <- drop(store$X1 %*% beta)
+  
+  JJ <- cbind(X1beta * x_nest$xa, # df/da = M1%*%b * ds/da0 (where ds/da0 = s because s = exp(a0) xa)
+              X1beta * x_nest$xa_da, # df/da = M1%*%b * ds/da
+              store$X0) # df/db = Ma 
+  
+  return(list("JJ" = JJ, "xa" = x_nest$xa) )
+}
 
 
 

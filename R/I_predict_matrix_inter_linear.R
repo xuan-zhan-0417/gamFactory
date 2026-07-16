@@ -15,9 +15,9 @@
   di <- length(alpha)
   
   Xi <- data[[term_x]]
-  if(!is.matrix(Xi)){
-    Xi <- matrix(Xi, ncol = length(alpha))
-  }
+  # if(!is.matrix(Xi)){
+  #   Xi <- matrix(Xi, ncol = length(alpha))
+  # }
 
   Xi <- t(t(Xi) - si$xm) %*% si$B
   xa <- Xi %*% (alpha + a0)  # z

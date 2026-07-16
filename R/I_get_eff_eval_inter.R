@@ -1,4 +1,4 @@
-.get_eff_eval_general <- function(){
+.get_eff_eval_inter <- function(){
   
   .eval <- function(param, deriv = 0){
     
@@ -14,7 +14,7 @@
     # Build P-spline basis and its derivatives
     # We are also getting the derivatives of the inner linear predictor w.r.t.
     # the scale parameter a0 and the coefficients alpha
-    store <- basis$evalX(x = a0 * (inner$d0 - mean(inner$d0)), deriv = deriv)
+    store <- basis$evalX(z = a0 * (inner$d0 - mean(inner$d0)), t = t, deriv = deriv)
     store$g <- a0 * (inner$d0 - mean(inner$d0)) 
     store$Xi <- Xi
     if( deriv >= 1 ){

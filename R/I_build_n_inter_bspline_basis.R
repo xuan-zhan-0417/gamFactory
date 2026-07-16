@@ -57,7 +57,7 @@
   S1_final <- rbind(cbind(pad_mat, pad_cross), cbind(t(pad_cross), as.matrix(S1_spline)))
   S2_final <- rbind(cbind(pad_mat, pad_cross), cbind(t(pad_cross), as.matrix(S2_spline)))
   
-  
+  # out <- out1
   out <- object
   out$X <- as.matrix(X_final)
   out$S <- list(as.matrix(S1_final), as.matrix(S2_final))
@@ -74,6 +74,7 @@
   out$xt <- list()
   out$xt$si <- si # only one si for linear effect
   out$xt$basis <- .wrap_2d_nested_basis(b1 = out1$xt$basis, b2 = out2$xt$basis)
+  out$xt$sumConv <- FALSE
   
   return(out)
 }

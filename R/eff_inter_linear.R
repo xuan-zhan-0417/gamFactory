@@ -1,14 +1,14 @@
 #'
-#' Build interaction effect
+#' Build interaction_linear effect
 #' 
 #' @param Xi matrix to be projected via single index vector \code{alpha}.
 #' @param basis function which takes \code{si = Xi\%*\%alpha} as input and returns model
 #'                  matrix and its derivatives w.r.t. \code{si}.
-#' @name eff_inter
-#' @rdname eff_inter
-#' @export eff_inter
+#' @name eff_inter_linear
+#' @rdname eff_inter_linear
+#' @export eff_inter_linear
 #'
-eff_inter <- function(Xi, t, basis, a0 = NULL){
+eff_inter_linear <- function(Xi, t, basis, a0 = NULL){
   
   force(Xi); force(basis); force(a0)
   
@@ -78,7 +78,7 @@ eff_inter <- function(Xi, t, basis, a0 = NULL){
     # }
     # # ==============================================================
 
-    o <- eff_inter(Xi = Xi, t = t, basis = basis, a0 = a0)
+    o <- eff_inter_linear(Xi = Xi, t = t, basis = basis, a0 = a0)
     o$f <- drop( store$X0 %*% beta )
     o$param <- param
     o$a0 <- a0

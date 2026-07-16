@@ -6,6 +6,7 @@
 \alias{trans_nexpsm}
 \alias{trans_linear_nexpsm}
 \alias{trans_inter_linear}
+\alias{trans_inter_nexp}
 \title{Specifying inner transformations}
 \usage{
 trans_linear(pord, S, alpha, a0)
@@ -30,6 +31,8 @@ trans_linear_nexpsm(
 )
 
 trans_inter_linear(pord = NULL, S = NULL, alpha = NULL, a0 = NULL)
+
+trans_inter_nexp(pord = NULL, S = NULL, alpha = NULL)
 }
 \arguments{
 \item{pord}{The order of the differences of the transformation parameters

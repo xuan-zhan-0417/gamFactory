@@ -137,7 +137,25 @@ trans_inter_linear <- function(
   
 }
 
+#
+# Specifying an interactive adaptive exponential smoothing transformation
+# 
+#' @rdname trans_xxx
+#' @export trans_inter_nexp
+#'
+trans_inter_nexp <- function(
+    pord = NULL, 
+    S = NULL, 
+    alpha = NULL
+){
+  
+  out <- lapply(as.list(match.call())[-1], eval, envir = parent.frame())
+  
+  out$type <- "inter_nexp" 
 
+  return(out)
+  
+}
 
 
 
