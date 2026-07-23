@@ -62,6 +62,14 @@
           basis = extra$basis
         )
         
+      }else if(effType[ii] == "inter_mgks.nested"){
+        eff[[ii]] <- eff_inter_mgks(
+          y     = extra$si$x,
+          dist  = extra$si$dist,
+          t     = extra$si$t,
+          basis = extra$basis
+        )
+        
       }
       else {
         stop("Don't know this effect type")

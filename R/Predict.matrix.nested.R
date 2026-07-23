@@ -26,6 +26,9 @@ Predict.matrix.nested <- function(object, data, ...){
   if(class(object)[1] == "inter_nexp"){
     return( .predict.matrix.inter_nexp(object, data, ...) )
   }
+  if(class(object)[1] == "inter_mgks"){
+    return( .predict.matrix.inter_mgks(object, data, ...) )
+  }
   
   stop("Predict.matrix.nested --- I do not know this effect type")
   

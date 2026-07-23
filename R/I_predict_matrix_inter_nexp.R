@@ -3,7 +3,6 @@
 #' @param object 
 #' @param data 
 #' @param get.xa 
-#' @noRd
 #' Predict using nested interactive exponential smoothing effects
 #' 
 #' @noRd
