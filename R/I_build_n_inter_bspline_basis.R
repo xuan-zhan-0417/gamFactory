@@ -42,11 +42,12 @@
   # penalty matrix
   S1 <- out1$S[[1]]
   S2 <- out2$S[[1]]
-  S1_inter <- kronecker(S1, diag(p2))
-  S2_inter <- kronecker(diag(p1), S2)
+  S_inter <- kronecker(S1, S2)
+  p_inter <- ncol(S_inter)
   
-  S1_spline <- Matrix::bdiag(S1, matrix(0, p2, p2), S1_inter)
-  S2_spline <- Matrix::bdiag(matrix(0, p1, p1), S2, S2_inter)
+  S1_spline <- Matrix::bdiag(S1, matrix(0, p2, p2), matrix(0, p_inter, p_inter))
+  S2_spline <- Matrix::bdiag(matrix(0, p1, p1), S2, matrix(0, p_inter, p_inter))
+  S_inter_spline <- Matrix::bdiag(matrix(0, p1, p1), matrix(0, p2, p2), S_inter)
   
   # pad 0 to X_2D and S_inter
   di <- length(si$alpha)
@@ -56,14 +57,16 @@
   pad_cross <- matrix(0, di, dsmo_total)
   S1_final <- rbind(cbind(pad_mat, pad_cross), cbind(t(pad_cross), as.matrix(S1_spline)))
   S2_final <- rbind(cbind(pad_mat, pad_cross), cbind(t(pad_cross), as.matrix(S2_spline)))
-  
+  S_inter_final <-  rbind(cbind(pad_mat, pad_cross), cbind(t(pad_cross), as.matrix(S_inter_spline)))
+    
   # out <- out1
   out <- object
   out$X <- as.matrix(X_final)
-  out$S <- list(as.matrix(S1_final), as.matrix(S2_final))
+  out$S <- list(as.matrix(S1_final), as.matrix(S2_final), as.matrix(S_inter_final))
   out$bs.dim <- ncol(X_final)
   out$rank <- c(as.numeric(Matrix::rankMatrix(S1_final)), 
-                as.numeric(Matrix::rankMatrix(S2_final)))
+                as.numeric(Matrix::rankMatrix(S2_final)),
+                as.numeric(Matrix::rankMatrix(S_inter_final)))
   out$null.space.dim <- out$bs.dim - sum(out$rank)
   out$df <- out$bs.dim      
   out$C <- matrix(0, 0, out$bs.dim)

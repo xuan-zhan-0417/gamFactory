@@ -87,25 +87,25 @@ smooth.construct.inter_mgks.smooth.spec <- function(object, data, knots){
   # =========================================================================
   out <- .build_n_inter_bspline_basis(object = object, data = data, knots = knots, si = si)
   
-  # =========================================================================
-  # 6. Resolve overlapping constraints in outer penalty matrices
-  # =========================================================================
-  n_mats <- length(out$S)
-  matrix_dim <- nrow(out$S[[1]])
-  
-  diag_matrix <- sapply(out$S, diag)
-  ol_ind <- which(rowSums(diag_matrix == 1) > 1)
-  out$S[[n_mats + 1]] <- matrix(0, nrow = matrix_dim, ncol = matrix_dim)
-  
-  if (length(ol_ind) > 0) {
-    diag(out$S[[n_mats + 1]])[ol_ind] <- 1
-    for (i in 1:n_mats) {
-      diag(out$S[[i]])[ol_ind] <- 0
-    }
-  }
-  
-  out$rank <- sapply(out$S, function(Sm) as.numeric(Matrix::rankMatrix(Sm)))
-  
+  # # =========================================================================
+  # # 6. Resolve overlapping constraints in outer penalty matrices
+  # # =========================================================================
+  # n_mats <- length(out$S)
+  # matrix_dim <- nrow(out$S[[1]])
+  # 
+  # diag_matrix <- sapply(out$S, diag)
+  # ol_ind <- which(rowSums(diag_matrix == 1) > 1)
+  # out$S[[n_mats + 1]] <- matrix(0, nrow = matrix_dim, ncol = matrix_dim)
+  # 
+  # if (length(ol_ind) > 0) {
+  #   diag(out$S[[n_mats + 1]])[ol_ind] <- 1
+  #   for (i in 1:n_mats) {
+  #     diag(out$S[[i]])[ol_ind] <- 0
+  #   }
+  # }
+  # 
+  # out$rank <- sapply(out$S, function(Sm) as.numeric(Matrix::rankMatrix(Sm)))
+  # 
   # =========================================================================
   # 7. Assign classes and return
   # =========================================================================

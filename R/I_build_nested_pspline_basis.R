@@ -23,8 +23,8 @@
   if( is.null(knots_x) ){
     ko <- dsmo + m[1] + 2      # Total number of knots B-spline knots
     kin <- ko - 2 * (m[1] + 1) # Number of inner knots
-    # Dynamically setting the kex range
-    x_range <- range(x, na.rm = TRUE) 
+    # Dynamically setting the kex range, and expand 1
+    x_range <- range(x, na.rm = TRUE) + c(-1, 1) 
     if(x_range[1] < -6 || x_range[2] > 6) {
       kex <- x_range           
     } else {
