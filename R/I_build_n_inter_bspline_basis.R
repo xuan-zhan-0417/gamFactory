@@ -42,12 +42,19 @@
   # penalty matrix
   S1 <- out1$S[[1]]
   S2 <- out2$S[[1]]
-  S_inter <- kronecker(S1, S2)
-  p_inter <- ncol(S_inter)
+  S_1_inter <- kronecker(S1, diag(p1))
+  S_2_inter <- kronecker(S2, diag(p2))
+
+  overlap <- (S_1_inter != 0) & (S_2_inter != 0)
   
-  S1_spline <- Matrix::bdiag(S1, matrix(0, p2, p2), matrix(0, p_inter, p_inter))
-  S2_spline <- Matrix::bdiag(matrix(0, p1, p1), S2, matrix(0, p_inter, p_inter))
-  S_inter_spline <- Matrix::bdiag(matrix(0, p1, p1), matrix(0, p2, p2), S_inter)
+  S3 <- matrix(0, nrow = nrow(S_1_inter), ncol = ncol(S_1_inter))
+  S3[overlap] <- 1
+  S_1_inter[overlap] <- 0
+  S_2_inter[overlap] <- 0
+  
+  S1_spline <- Matrix::bdiag(S1, matrix(0, p2, p2), S_1_inter)
+  S2_spline <- Matrix::bdiag(matrix(0, p1, p1), S2, S_2_inter)
+  S_inter_spline <- Matrix::bdiag(matrix(0, p1, p1), matrix(0, p2, p2), S3)
   
   # pad 0 to X_2D and S_inter
   di <- length(si$alpha)
