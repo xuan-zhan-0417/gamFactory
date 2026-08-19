@@ -59,7 +59,8 @@
           y     = extra$si$x_raw,
           Xi    = Xi,
           t     = extra$si$t,
-          basis = extra$basis
+          basis = extra$basis,
+          times = extra$si$times
         )
         
       }else if(effType[ii] == "inter_mgks.nested"){

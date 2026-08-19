@@ -3,11 +3,10 @@
 .build_nested_bspline_basis <- function(object, data, knots, si){
   
   dsmo <- object$bs.dim    # Number of outer basis functions before imposing constraints (see below)
-  di <- length( si$alpha ) # Number of transformation coefficients
-  
   term <- object$term
   x <- data[[term]]
   knots_x <- knots[[term]] 
+  di <- length( si$alpha ) # Number of transformation coefficients
   
   if( abs(mean(x)) > 1e-6 ){
     stop("The data should be centered!")

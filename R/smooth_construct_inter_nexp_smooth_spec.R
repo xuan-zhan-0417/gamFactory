@@ -33,16 +33,33 @@ smooth.construct.inter_nexp.smooth.spec <- function(object, data, knots){
   # 3. Split X_mat into raw x and weight matrix W (w1, w2)
   # =========================================================================
   X_mat <- data[[term_x]]
+  nms <- colnames(X_mat)
+  
+  # Extract times and remove from X_mat to not interfere with x and W extraction
+  times <- NULL
+  tmp <- which(nms == "times")
+  if (length(tmp)) {
+    times <- X_mat[, tmp]
+  }
+  
   if (ncol(X_mat) < 2) {
     stop("X_mat must have at least 2 columns: x (data to smooth) and w variables.")
   }
-  
-  x_raw <- X_mat[, 1]
-  W_mat <- X_mat[, -1, drop = FALSE] # Contains w1 (intercept) and w2
   n <- nrow(X_mat)
   
+  x_raw <- as.vector( t(X_mat[ , which(nms == "y")]) ) #data to be smoothed
+  W_mat <- X_mat[ , which(nms == "x"), drop = FALSE] # model matrix used to model the exp smoothing rate/weight
+  
+  nrep <- ceiling( length(x_raw)/n )
+  dXi <- ncol(W_mat)/nrep
+  if(nrep > 1){
+    tmp <- rep(1:dXi, nrep)
+    W_mat <- apply(W_mat, 1, function(x) do.call("cbind", tapply(x, tmp, I)), simplify = FALSE)
+    W_mat <- do.call("rbind", W_mat)
+  }
+  
   # di is the total number of inner parameters: alpha_scale + alpha_intercept + alpha_w
-  di <- ncol(W_mat) + 1 
+  di <- ncol(W_mat) + 1
   
   # =========================================================================
   # 4. Handle inner penalty (for alpha_w) and reparameterization
@@ -68,7 +85,7 @@ smooth.construct.inter_nexp.smooth.spec <- function(object, data, knots){
   alpha <- si$alpha
   if( is.null(alpha) ){ 
     # alpha[1] s.t. sd(inner_lin_pred) = 1 (target variance)
-    g <- expsmooth(y = x_raw, Xi = si$X, beta = rep(0, di-1))$d0
+    g <- expsmooth(y = x_raw, Xi = si$X, beta = rep(0, di-1), times = times)$d0
     alpha <- si$alpha <- c(log(1/sd(g)), rep(0, di-1))
   } else {
     alpha <- solve(si$B) %*% alpha
@@ -82,14 +99,15 @@ smooth.construct.inter_nexp.smooth.spec <- function(object, data, knots){
   # si$xm <- mean(g) # Save mean for prediction
   si$x_raw <- x_raw
   si$W_mat <- W_mat
+  si$times <- times
   
   # =========================================================================
-  # 7. Build custom 2D B-spline basis (X_2D)
+  # 6. Build custom 2D B-spline basis (X_2D)
   # =========================================================================
   out <- .build_n_inter_bspline_basis(object = object, data = data, knots = knots, si = si)
   
   # =========================================================================
-  # 8. Assemble final block-diagonal penalty matrix
+  # 7. Assemble final block-diagonal penalty matrix
   # =========================================================================
   dsmo <- out$bs.dim - di 
   si <- out$xt$si

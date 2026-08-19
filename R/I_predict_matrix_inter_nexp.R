@@ -32,10 +32,23 @@
   # 2. Extract and split data
   # =========================================================================
   X_mat <- data[[term_x]]
-  x_raw <- X_mat[, 1]
-  W_mat <- X_mat[, -1, drop = FALSE]
+  n <- nrow(X_mat)
+  nms <- colnames(X_mat)
+  x_raw <- as.vector( t(X_mat[ , which(nms == "y")]) )
+  times <- NULL
+  tmp <- which(nms == "times")
+  if( length(tmp) ){
+    times <- X_mat[ , tmp]
+  }
+  W_mat <- X_mat[ , which(nms == "x"), drop = FALSE]
   
-  t_vec <- data[[term_t]]
+  nrep <- ceiling( length(x_raw)/n )
+  dXi <- ncol(W_mat)/nrep
+  if(nrep > 1){
+    tmp <- rep(1:dXi, nrep)
+    W_mat <- apply(W_mat, 1, function(x) do.call("cbind", tapply(x, tmp, I)), simplify = FALSE)
+    W_mat <- do.call("rbind", W_mat)
+  }
   
   # =========================================================================
   # 3. Inner model: Exponential smoothing and derivatives
@@ -45,7 +58,7 @@
   
   # Evaluate the C++ backend (assuming expsmooth handles the sigmoid internally or 
   # beta weights linear predictor. If expsmooth is standard, ensure it matches your omega definition).
-  xsm_list <- expsmooth(y = x_raw, Xi = W_mat_rot, beta = a1, times = NULL, deriv = get.xa)
+  xsm_list <- expsmooth(y = x_raw, Xi = W_mat_rot, beta = a1, times = times, deriv = get.xa)
   
   # Center and scale the smoothed variable
   xsm_unscaled <- xsm_list$d0 - si$xm

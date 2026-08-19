@@ -158,7 +158,7 @@ trans_inter_nexp <- function(
 }
 
 #
-# Specifying an interactive adaptive exponential smoothing transformation
+# Specifying an interactive mgks transformation
 # 
 #' @rdname trans_xxx
 #' @export trans_inter_mgks

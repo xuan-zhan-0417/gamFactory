@@ -10,7 +10,7 @@
 #'
 eff_inter_linear <- function(Xi, t, basis, a0 = NULL){
   
-  force(Xi); force(basis); force(a0)
+  force(Xi); force(basis); force(a0); force(t);
   
   eval <- function(param, deriv = 0){
 

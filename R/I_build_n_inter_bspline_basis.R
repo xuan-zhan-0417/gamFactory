@@ -33,6 +33,7 @@
   out2 <- .build_nested_bspline_basis(obj2, data, knots, si = NULL) 
   
   X1 <- out1$X; X2 <- out2$X
+
   n <- nrow(X1)
   p1 <- ncol(X1); p2 <- ncol(X2)
   
