@@ -1,0 +1,97 @@
+#' Build interaction_dlinear effect
+#' 
+#' @param Xi A combined matrix, with attributes "na1" and "na2".
+#' @param basis function which takes z1 and z2 as inputs and returns the model matrix.
+#' @param a0 A numeric vector (concatenated, length na1 + na2) of initialization shifts.
+#' @name eff_inter_dlinear
+#' @rdname eff_inter_dlinear
+#' @export eff_inter_dlinear
+#'
+eff_inter_dlinear <- function(Xi, basis, a0 = NULL) {
+  
+  na1 <- attr(Xi, "na1")
+  na2 <- attr(Xi, "na2")
+  if (is.null(na1) || is.null(na2)) {
+    stop("Attributes 'na1' and 'na2' must be defined in Xi.")
+  }
+  na <- na1 + na2
+  if (ncol(Xi) != na) stop("ncol(Xi) must equal na1 + na2.")
+  
+  # normalise a0 once, at construction time, so that o$a0 is never NULL
+  if (is.null(a0)) { a0 <- numeric(na) }
+  if (length(a0) != na) stop("length(a0) must equal na1 + na2.")
+  
+  idx1 <- 1:na1
+  idx2 <- (na1 + 1):na
+  
+  force(Xi); force(basis); force(a0)
+  
+  eval <- function(param, deriv = 0) {
+    
+    n <- nrow(Xi)
+    
+    alpha_1 <- param[ idx1 ]
+    alpha_2 <- param[ idx2 ]
+    beta    <- param[ -(1:na) ]
+    
+    # inner indices z1, z2
+    ax_1 <- drop( Xi[, idx1, drop = FALSE] %*% (alpha_1 + a0[idx1]) )
+    ax_2 <- drop( Xi[, idx2, drop = FALSE] %*% (alpha_2 + a0[idx2]) )
+    
+    store <- basis$evalX(z1 = ax_1, z2 = ax_2, deriv = deriv)
+    store$Xi <- Xi
+    
+    # g is VECTOR valued here: g_i = (z_1i, z_2i).  Do NOT collapse to a scalar:
+    # the base-class pen_var / DllkDbeta.nested assume a scalar g and would
+    # silently impose var(z1 + z2) = 1 instead of var(z1) = var(z2) = 1.
+    store$g  <- cbind(z1 = ax_1, z2 = ax_2)
+    
+    if( deriv >= 1 ){
+      
+      # dg_k / dalpha_k ; the cross blocks dg_1/dalpha_2, dg_2/dalpha_1 are zero
+      store$g1 <- list(
+        g1_1 = Xi[, idx1, drop = FALSE],
+        g1_2 = Xi[, idx2, drop = FALSE]
+      )
+      
+      # df / dz_k
+      store$f1 <- list(
+        f1_1 = drop( store$X1$dz1 %*% beta ),
+        f1_2 = drop( store$X1$dz2 %*% beta )
+      )
+      
+      if( deriv >= 2 ){
+        
+        # d2f / dz_j dz_k
+        store$f2 <- list(
+          f2_11 = drop( store$X2$dz1_z1 %*% beta ),
+          f2_22 = drop( store$X2$dz2_z2 %*% beta ),
+          f2_12 = drop( store$X2$dz1_z2 %*% beta )
+        )
+        
+        # z_k is linear in alpha_k, so every second derivative of g vanishes.
+        # Kept per component so that a non-linear inner map can drop in later.
+        store$g2 <- list(
+          g2_1 = matrix(0, nrow = n, ncol = na1 * (na1 + 1) / 2),
+          g2_2 = matrix(0, nrow = n, ncol = na2 * (na2 + 1) / 2)
+        )
+      }
+    }
+    
+    o <- eff_inter_dlinear(Xi = Xi, basis = basis, a0 = a0)
+    o$f     <- drop( store$X0 %*% beta )
+    o$param <- param
+    o$a0    <- a0
+    o$na    <- na
+    o$na1   <- na1
+    o$na2   <- na2
+    o$store <- store
+    o$deriv <- deriv
+    
+    return( o )
+  }
+  
+  out <- structure(list("eval" = eval), class = c("inter_dlinear", "nested"))
+  
+  return( out )
+}

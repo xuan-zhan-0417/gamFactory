@@ -15,9 +15,11 @@ pen_var <- function(o, v, deriv = 0){
   cl <- class(o)
   out <- NULL
   if("nested" %in% cl){
-    if("si" %in% cl){
+    if("inter_dlinear" %in% cl){
+      out <- .pen_var_inter_dlinear(o = o, v = v, deriv = deriv)
+    } else if("si" %in% cl){
       out <- .pen_var_si(o = o, v = v, deriv = deriv)
-    } else{
+    } else {
       out <- .pen_var_gen(o = o, v = v, deriv = deriv)
     }
   }
@@ -31,7 +33,9 @@ pen_var_outer <- function(o, v, DaDr){
   cl <- class(o)
   out <- NULL
   if("nested" %in% cl){
-    if("si" %in% cl){
+    if("inter_dlinear" %in% cl){
+      out <- .pen_var_inter_dlinear_outer(o = o, v = v, DaDr = DaDr)
+    } else if("si" %in% cl){
       out <- .pen_var_si_outer(o = o, v = v, DaDr = DaDr)
     } else {
       out <- .pen_var_gen_outer(o = o, v = v, DaDr = DaDr)

@@ -71,6 +71,13 @@
           basis = extra$basis
         )
         
+      }else if(effType[ii] == "inter_dlinear.nested"){
+        eff[[ii]] <- eff_inter_dlinear(
+          Xi    = Xi,
+          basis = extra$basis,
+          a0    = extra$si$a0
+        )
+        
       }
       else {
         stop("Don't know this effect type")

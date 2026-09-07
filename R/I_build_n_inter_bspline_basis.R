@@ -1,4 +1,4 @@
-.build_n_inter_bspline_basis <- function(object, data, knots, si) {
+.build_n_inter_bspline_basis <- function(object, data, knots, si, nested) {
   
   # k <- object$bs.dim
   # if (is.null(k) || all(k < 0) || all(is.na(k))) {
@@ -59,6 +59,7 @@
   
   # pad 0 to X_2D and S_inter
   di <- length(si$alpha)
+  if (isTRUE(di == 0)) {di <- length(si$alpha_1) + length(si$alpha_2) }
   dsmo_total <- ncol(X_spline)
   X_final <- cbind(matrix(0, n, di), X_spline)
   pad_mat   <- matrix(0, di, di)
@@ -84,7 +85,7 @@
   out$repara <- TRUE
   out$xt <- list()
   out$xt$si <- si # only one si for linear effect
-  out$xt$basis <- .wrap_2d_nested_basis(b1 = out1$xt$basis, b2 = out2$xt$basis)
+  out$xt$basis <- .wrap_2d_nested_basis(b1 = out1$xt$basis, b2 = out2$xt$basis, nested = nested)
   out$xt$sumConv <- FALSE
   
   return(out)

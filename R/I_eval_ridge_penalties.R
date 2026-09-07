@@ -12,9 +12,9 @@
     aii <- iec[1:eff[[ii]]$na]
     cl <- class(eff[[ii]])
     if("nested" %in% cl){
-      if("si" %in% cl){
+      if("si" %in% cl || "inter_dlinear" %in% cl){
         ipc <- 1:eff[[ii]]$na
-      } else{
+      } else {
         ipc <- 2:eff[[ii]]$na
       }
         pen[[kk]] <- pen_ridge_var(o = eff[[ii]], extra = extra, ipc = ipc, deriv = deriv)

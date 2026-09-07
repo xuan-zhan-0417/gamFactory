@@ -30,7 +30,7 @@ eff_inter_linear <- function(Xi, t, basis, a0 = NULL){
     
     # Build P-spline basis and its derivatives
     # The error is probably due to the fact that no observations falls within range
-    store <- basis$evalX(z = ax, t = t,deriv = deriv)
+    store <- basis$evalX(z1 = ax, z2 = t,deriv = deriv)
     store$Xi <- Xi
     if( deriv >= 1 ){
       store$f1 <- drop( store$X1 %*% beta )

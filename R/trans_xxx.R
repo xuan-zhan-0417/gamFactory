@@ -90,7 +90,8 @@ trans_nexpsm <- function(S, alpha){
 #' @export trans_linear_nexpsm
 #'
 trans_linear_nexpsm <- function(
-    pord         = NULL,
+    pord_1       = NULL,
+    pord_2       = NULL,
     S_si         = NULL,
     S_nexp       = NULL,
     alpha_nexp   = NULL,
@@ -172,6 +173,32 @@ trans_inter_mgks <- function(
   out <- lapply(as.list(match.call())[-1], eval, envir = parent.frame())
   
   out$type <- "inter_mgks" 
+  
+  return(out)
+  
+}
+
+#
+# Specifying an interactive transformation with linear transformation on both side
+# 
+#' @rdname trans_xxx
+#' @export trans_inter_dlinear
+#'
+trans_inter_dlinear <- function(
+    # should be vector or list, because we have two margin now
+    pord_1 = NULL, 
+    pord_2 = NULL,
+    S_1 = NULL, 
+    S_2 = NULL,
+    alpha_1 = NULL,
+    alpha_2 = NULL,
+    a0_1 = NULL,
+    a0_2 = NULL
+){
+  
+  out <- lapply(as.list(match.call())[-1], eval, envir = parent.frame())
+  
+  out$type <- "inter_dlinear" 
   
   return(out)
   

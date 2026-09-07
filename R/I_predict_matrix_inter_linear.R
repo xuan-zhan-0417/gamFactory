@@ -28,7 +28,7 @@
   
   t_var <- data[[term_t]]  - si$tm  
   
-  X0 <- object$xt$basis$evalX(z = xa, t = t_var, deriv = 0)$X0
+  X0 <- object$xt$basis$evalX(z1 = xa, z2 = t_var, deriv = 0)$X0
   
   # [ 0_di, X_2D ]
   Xtot <- cbind(matrix(0, nrow(X0), di), X0) 

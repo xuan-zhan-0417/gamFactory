@@ -93,7 +93,7 @@ smooth.construct.inter_linear.smooth.spec <- function(object, data, knots){
   # =========================================================================
   ax <- drop( si$X %*% (si$alpha + si$a0) ) 
   data[[term_x]] <- ax
-  out <- .build_n_inter_bspline_basis(object = object, data = data, knots = knots, si = si)
+  out <- .build_n_inter_bspline_basis(object = object, data = data, knots = knots, si = si, nested = c(TRUE, FALSE))
   
   # # =======================================================================
   # assemble penalty matrix

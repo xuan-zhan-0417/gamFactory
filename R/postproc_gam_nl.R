@@ -36,15 +36,18 @@ postproc_gam_nl <- function(o, info) {
       
       # Inner smooth must be centered using original data
       needs_base_xm <- is.null(si$xm)
-      if (needs_base_xm || has_si_nexpsm) {
-        inner_mean <- mean(attr(Predict.matrix.nested(sii, data = o$model), "inner_linpred_unscaled"))
-        if (needs_base_xm) {
-          si$xm <- inner_mean
+      if ("inter_dlinear" %in% types) {
+        na_tot <- length(si$alpha)
+        if (needs_base_xm || length(si$xm) != na_tot) {
+          stop("inter_dlinear: si$xm must be a length-", na_tot,
+               " vector of marginal column means (set in smooth.construct).")
         }
-        if (has_si_nexpsm) {
-          si$xm <- c(si$xm, nexp = inner_mean)
-        }
-        sii$xt$si$xm <- si$xm 
+      } else if (needs_base_xm || has_si_nexpsm) {
+        inner_mean <- mean(attr(Predict.matrix.nested(sii, data = o$model),
+                                "inner_linpred_unscaled"))
+        if (needs_base_xm) si$xm <- inner_mean
+        if (has_si_nexpsm) si$xm <- c(si$xm, nexp = inner_mean)
+        sii$xt$si$xm <- si$xm
       }
       
       jacobian <- get_jacobian.nested(sii, data = o$model, param = coef(o)[info$iec[[ii]]])
