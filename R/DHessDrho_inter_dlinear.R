@@ -2,11 +2,11 @@
 #'
 #' Derivative of inter_linear Hessian w.r.t smoothing parameters
 #' 
-#' @name DHessDrho.inter_linear
-#' @rdname DHessDrho.inter_linear
+#' @name DHessDrho.inter_dlinear
+#' @rdname DHessDrho.inter_dlinear
 #' @export 
 #'
-DHessDrho.inter_linear <- function(o, llk, DbDr){
+DHessDrho.inter_dlinear <- function(o, llk, DbDr){
   
   DHessDrho.si(o = o, llk = llk, DbDr = DbDr)
   

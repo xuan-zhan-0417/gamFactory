@@ -104,7 +104,7 @@ smooth.construct.inter_nexp.smooth.spec <- function(object, data, knots){
   # =========================================================================
   # 6. Build custom 2D B-spline basis (X_2D)
   # =========================================================================
-  out <- .build_n_inter_bspline_basis(object = object, data = data, knots = knots, si = si)
+  out <- .build_n_inter_bspline_basis(object = object, data = data, knots = knots, si = si, nested = c(TRUE, FALSE))
   
   # =========================================================================
   # 7. Assemble final block-diagonal penalty matrix

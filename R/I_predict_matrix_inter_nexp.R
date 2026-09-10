@@ -83,7 +83,7 @@
   
   # Compute outer model matrix using the basis evaluator created in constructor
   # For the custom 2D tensor, evalX typically expects the updated data environment
-  X0 <- object$xt$basis$evalX(z = xsm, t = t_var, deriv = 0)$X0
+  X0 <- object$xt$basis$evalX(z1 = xsm, z2 = t_var, deriv = 0)$X0
   
   # Total model matrix is X0 preceded by a matrix of zeros. 
   # predict.gam will multiply the latter by alpha, which will have no effect (the standard gamFactory trick).

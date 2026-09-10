@@ -85,7 +85,7 @@ smooth.construct.inter_mgks.smooth.spec <- function(object, data, knots){
   # =========================================================================
   # 5. Build 2D interactive B-spline basis matrix X_2D
   # =========================================================================
-  out <- .build_n_inter_bspline_basis(object = object, data = data, knots = knots, si = si)
+  out <- .build_n_inter_bspline_basis(object = object, data = data, knots = knots, si = si, nested = c(TRUE, FALSE))
   
   # =========================================================================
   # 6. Assign classes and return

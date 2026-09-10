@@ -87,7 +87,7 @@
   t_var <- t_vec - si$tm  
   
   # Compute outer 2D model matrix using the ANOVA tensor product basis evaluator
-  X0 <- object$xt$basis$evalX(z = xsm, t = t_var, deriv = 0)$X0
+  X0 <- object$xt$basis$evalX(z1 = xsm, z2 = t_var, deriv = 0)$X0
   
   # Total design matrix: pad with zero columns corresponding to non-linear parameters alpha
   # (Standard gamFactory trick to allow predict.gam to align dimensions)

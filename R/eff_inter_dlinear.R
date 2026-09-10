@@ -41,10 +41,17 @@ eff_inter_dlinear <- function(Xi, basis, a0 = NULL) {
     store <- basis$evalX(z1 = ax_1, z2 = ax_2, deriv = deriv)
     store$Xi <- Xi
     
-    # g is VECTOR valued here: g_i = (z_1i, z_2i).  Do NOT collapse to a scalar:
-    # the base-class pen_var / DllkDbeta.nested assume a scalar g and would
-    # silently impose var(z1 + z2) = 1 instead of var(z1) = var(z2) = 1.
-    store$g  <- cbind(z1 = ax_1, z2 = ax_2)
+    # Nothing reads store$g for this class: pen_var dispatches to
+    # .pen_var_inter_dlinear, which recomputes both indices from param and Xi.
+    
+    # It is kept for inspection, and as documentation of the inner map's shape.
+    # Error from pen_var comes from g1(it's a list now), not from g.
+    
+    # "list" and "cbind" both works.
+    # store$g <- list(z1 = ax_1, z2 = ax_2)
+    
+    store$g <- cbind(z1 = ax_1, z2 = ax_2)
+
     
     if( deriv >= 1 ){
       

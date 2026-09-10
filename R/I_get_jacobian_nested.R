@@ -105,7 +105,7 @@ get_jacobian.nested <- function(object,data, param){
   
   x_nest <- Predict.matrix.nested(object, data = data, get.xa = TRUE)
   
-  store <- object$xt$basis$evalX(z = x_nest$xa, t = object$xt$si$t, deriv = 1)
+  store <- object$xt$basis$evalX(z1 = x_nest$xa, z2 = object$xt$si$t, deriv = 1)
   X1beta <- drop(store$X1 %*% beta)
   
   JJ <- cbind(X1beta * x_nest$xa, # df/da = M1%*%b * ds/da0 (where ds/da0 = s because s = exp(a0) xa)
@@ -123,7 +123,7 @@ get_jacobian.nested <- function(object,data, param){
   
   x_nest <- Predict.matrix.nested(object, data = data, get.xa = TRUE)
   
-  store <- object$xt$basis$evalX(z = x_nest$xa, t = object$xt$si$t, deriv = 1)
+  store <- object$xt$basis$evalX(z1 = x_nest$xa, z2 = object$xt$si$t, deriv = 1)
   X1beta <- drop(store$X1 %*% beta)
   
   JJ <- cbind(X1beta * x_nest$xa, # df/da = M1%*%b * ds/da0 (where ds/da0 = s because s = exp(a0) xa)
