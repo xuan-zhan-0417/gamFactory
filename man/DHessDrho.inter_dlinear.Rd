@@ -7,5 +7,5 @@
 \method{DHessDrho}{inter_dlinear}(o, llk, DbDr)
 }
 \description{
-Derivative of inter_linear Hessian w.r.t smoothing parameters
+Derivative of inter_dlinear Hessian w.r.t smoothing parameters
 }

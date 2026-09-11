@@ -36,10 +36,10 @@ postproc_gam_nl <- function(o, info) {
       
       # Inner smooth must be centered using original data
       needs_base_xm <- is.null(si$xm)
-      if ("inter_dlinear" %in% types) {
+      if (isTRUE(si$na2 > 0)) {
         na_tot <- length(si$alpha)
         if (needs_base_xm || length(si$xm) != na_tot) {
-          stop("inter_dlinear: si$xm must be a length-", na_tot,
+          stop("inter_linear (nested_2 = TRUE): si$xm must be a length-", na_tot,
                " vector of marginal column means (set in smooth.construct).")
         }
       } else if (needs_base_xm || has_si_nexpsm) {

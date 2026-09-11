@@ -4,13 +4,23 @@
 \alias{eff_inter_linear}
 \title{Build interaction_linear effect}
 \usage{
-eff_inter_linear(Xi, t, basis, a0 = NULL)
+eff_inter_linear(Xi, basis, a0 = NULL, t = NULL)
 }
 \arguments{
-\item{Xi}{matrix to be projected via single index vector \code{alpha}.}
+\item{Xi}{matrix to be projected via single index vector(s). When margin 2
+is also nested (\code{s(si(x1), si(x2))}), \code{Xi} is the
+column-bound margin-1/margin-2 matrix carrying attributes
+\code{"na1"} and \code{"na2"}; otherwise (\code{s(si(x1), t)})
+\code{Xi} is the margin-1 matrix only and \code{t} must be
+supplied.}
 
-\item{basis}{function which takes \code{si = Xi\%*\%alpha} as input and returns model
-matrix and its derivatives w.r.t. \code{si}.}
+\item{basis}{function which takes \code{z1} (and \code{z2}) as input and
+returns the model matrix and its derivatives.}
+
+\item{a0}{A numeric vector of initialization shifts (length \code{ncol(Xi)}).}
+
+\item{t}{Vector of the plain (non-nested) margin-2 covariate. Only used
+when \code{Xi} carries no \code{"na2"} attribute.}
 }
 \description{
 Build interaction_linear effect

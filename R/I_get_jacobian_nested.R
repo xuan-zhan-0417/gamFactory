@@ -19,11 +19,8 @@ get_jacobian.nested <- function(object,data, param){
   if(class(object)[1] == "inter_nexp"){ 
     return(.get.jacobian.inter_nexp(object, data, param))
   }
-  if(class(object)[1] == "inter_mgks"){ 
+  if(class(object)[1] == "inter_mgks"){
     return(.get.jacobian.inter_mgks(object, data, param))
-  }
-  if(class(object)[1] == "inter_dlinear"){ 
-    return(.get.jacobian.inter_dlinear(object, data, param))
   }
   stop("I do not know this effect type")
   
@@ -84,16 +81,39 @@ get_jacobian.nested <- function(object,data, param){
 }
 
 .get.jacobian.inter_linear <- function(object, data, param){
-  
-  na <- length(object$xt$si$alpha)
-  # nested index and spline coefficients
+
+  na <- length(object$xt$si$alpha)     # na1 (+ na2 when margin 2 is also nested)
   beta <- param[ -(1:na) ]
-  
+
   x_nest <- Predict.matrix.nested(object, data = data, get.xa = TRUE)
-  store <- object$xt$basis$evalX(z1 = x_nest$xa, z2 = object$xt$si$t , deriv = 1)
-  
-  JJ <- cbind(drop(store$X1 %*% beta) * x_nest$xa_da, # df/da = M1%*%b * ds/da
-              store$X0) # df/db = Ma
+  nested_2 <- isTRUE(object$xt$si$na2 > 0)
+
+  if( nested_2 ){
+
+    store <- object$xt$basis$evalX(z1 = x_nest$z1, z2 = x_nest$z2, deriv = 1)
+
+    # df/dz_k = (dX/dz_k) %*% beta
+    f1_1 <- drop( store$X1$dz1 %*% beta )
+    f1_2 <- drop( store$X1$dz2 %*% beta )
+
+    # df/dalpha_k = (df/dz_k) * (dz_k/dalpha_k) ; cross blocks are exactly zero
+    JJ <- cbind(f1_1 * x_nest$xa_da[[1]],
+                f1_2 * x_nest$xa_da[[2]],
+                store$X0)
+
+    if( ncol(JJ) != length(param) ){
+      stop("Jacobian has ", ncol(JJ), " columns but param has length ",
+           length(param), ".")
+    }
+
+  } else {
+
+    store <- object$xt$basis$evalX(z1 = x_nest$xa, z2 = object$xt$si$t, deriv = 1)
+
+    JJ <- cbind(drop(store$X1 %*% beta) * x_nest$xa_da, # df/da = M1%*%b * ds/da
+                store$X0) # df/db = Ma
+  }
+
   return(list("JJ" = JJ, "xa" = x_nest$xa) )
 }
 
@@ -131,30 +151,4 @@ get_jacobian.nested <- function(object,data, param){
               store$X0) # df/db = Ma 
   
   return(list("JJ" = JJ, "xa" = x_nest$xa) )
-}
-
-.get.jacobian.inter_dlinear <- function(object, data, param){
-  
-  na   <- length(object$xt$si$alpha)     # na1 + na2
-  beta <- param[ -(1:na) ]
-  
-  x_nest <- Predict.matrix.nested(object, data = data, get.xa = TRUE)
-  
-  store <- object$xt$basis$evalX(z1 = x_nest$z1, z2 = x_nest$z2, deriv = 1)
-  
-  # df/dz_k = (dX/dz_k) %*% beta
-  f1_1 <- drop( store$X1$dz1 %*% beta )
-  f1_2 <- drop( store$X1$dz2 %*% beta )
-  
-  # df/dalpha_k = (df/dz_k) * (dz_k/dalpha_k) ; cross blocks are exactly zero
-  JJ <- cbind(f1_1 * x_nest$xa_da[[1]],
-              f1_2 * x_nest$xa_da[[2]],
-              store$X0)
-  
-  if( ncol(JJ) != length(param) ){
-    stop("Jacobian has ", ncol(JJ), " columns but param has length ",
-         length(param), ".")
-  }
-  
-  return( list("JJ" = JJ, "xa" = x_nest$xa) )
 }

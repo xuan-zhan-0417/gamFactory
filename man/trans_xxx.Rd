@@ -8,7 +8,7 @@
 \alias{trans_inter_linear}
 \alias{trans_inter_nexp}
 \alias{trans_inter_mgks}
-\alias{trans_inter_dlinear}
+\alias{trans_inter_le}
 \title{Specifying inner transformations}
 \usage{
 trans_linear(pord, S, alpha, a0)
@@ -33,13 +33,7 @@ trans_linear_nexpsm(
   positive_si = FALSE
 )
 
-trans_inter_linear(pord = NULL, S = NULL, alpha = NULL, a0 = NULL)
-
-trans_inter_nexp(pord = NULL, S = NULL, alpha = NULL)
-
-trans_inter_mgks(pord = NULL, S = NULL, alpha = NULL)
-
-trans_inter_dlinear(
+trans_inter_linear(
   pord_1 = NULL,
   pord_2 = NULL,
   S_1 = NULL,
@@ -48,6 +42,21 @@ trans_inter_dlinear(
   alpha_2 = NULL,
   a0_1 = NULL,
   a0_2 = NULL
+)
+
+trans_inter_nexp(pord = NULL, S = NULL, alpha = NULL)
+
+trans_inter_mgks(pord = NULL, S = NULL, alpha = NULL)
+
+trans_inter_le(
+  pord_1 = NULL,
+  pord_2 = NULL,
+  S_1 = NULL,
+  S_2 = NULL,
+  alpha_1 = NULL,
+  alpha_2 = NULL,
+  a0_1 = NULL,
+  alpha_scale = NULL
 )
 }
 \arguments{
@@ -65,6 +74,12 @@ by the optimiser.}
 
 \item{y0}{Vector of \eqn{n} observations corresponding to the rows of the variables in \code{s_nest}.}
 
+\item{pord_1}{As \code{pord}, but for margin 1 (the single index \code{si(x)}) of an
+interactive transformation.}
+
+\item{pord_2}{As \code{pord}, but for the covariates driving the adaptive smoothing
+rate of margin 2 (\code{exp(x)}) of an interactive transformation.}
+
 \item{S_si}{Penalty matrix used in trans_linear_nexpsm. For the linear transformation parameters.}
 
 \item{S_nexp}{Penalty matrix used in expsmooth. For the linear transformation parameters.}
@@ -73,9 +88,29 @@ by the optimiser.}
 
 \item{alpha_si}{Initial values used in trans_linear_nexpsm. For linear transformation parameters.}
 
+\item{alpha_scale}{Initial value for the scaling parameter multiplying the (centred)
+output of the adaptive exponential smooth of margin 2 (\code{exp(x)}).}
+
 \item{n_si}{Length of \code{alpha_si} if \code{alpha_si} is not provided.}
 
 \item{n_nexp}{Length of \code{alpha_nexp} if \code{alpha_nexp} is not provided.}
+
+\item{S_1}{As \code{S}, but for margin 1 (the single index \code{si(x)}) of an
+interactive transformation.}
+
+\item{S_2}{As \code{S}, but for the covariates driving the adaptive smoothing
+rate of margin 2 (\code{exp(x)}) of an interactive transformation.}
+
+\item{alpha_1}{As \code{alpha}, but for margin 1 (the single index \code{si(x)}) of an
+interactive transformation.}
+
+\item{alpha_2}{Initial values for the coefficients of the covariates driving the
+adaptive smoothing rate of margin 2 (\code{exp(x)}) of an interactive
+transformation. Its length must equal the number of columns named
+\code{"x"} in the matrix corresponding to margin 2.}
+
+\item{a0_1}{As \code{a0}, but for margin 1 (the single index \code{si(x)}) of an
+interactive transformation.}
 }
 \description{
 Functions to specify nested covariate transformations, to be used

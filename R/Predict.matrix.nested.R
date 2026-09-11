@@ -29,9 +29,6 @@ Predict.matrix.nested <- function(object, data, ...){
   if(class(object)[1] == "inter_mgks"){
     return( .predict.matrix.inter_mgks(object, data, ...) )
   }
-  if(class(object)[1] == "inter_dlinear"){
-    return( .predict.matrix.inter_dlinear(object, data, ...) ) 
-  }
   stop("Predict.matrix.nested --- I do not know this effect type")
   
 }

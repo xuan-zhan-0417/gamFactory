@@ -49,11 +49,11 @@
       } else if(effType[ii] == "inter_linear.nested"){
         eff[[ii]] <- eff_inter_linear(
           Xi    = Xi,
-          t     = extra$si$t,
           basis = extra$basis,
-          a0    = extra$si$a0
+          a0    = extra$si$a0,
+          t     = extra$si$t
         )
-        
+
       } else if(effType[ii] == "inter_nexp.nested"){
         eff[[ii]] <- eff_inter_nexp(
           y     = extra$si$x_raw,
@@ -69,13 +69,6 @@
           dist  = extra$si$dist,
           t     = extra$si$t,
           basis = extra$basis
-        )
-        
-      }else if(effType[ii] == "inter_dlinear.nested"){
-        eff[[ii]] <- eff_inter_dlinear(
-          Xi    = Xi,
-          basis = extra$basis,
-          a0    = extra$si$a0
         )
         
       }

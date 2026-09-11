@@ -8,117 +8,105 @@
 #'
 smooth.construct.inter_linear.smooth.spec <- function(object, data, knots){
   
-  # =========================================================================
-  # initialise si
-  # =========================================================================
   if(length(object$term) != 2) {
-    stop("The smooth effect must contain exactly two terms: the multivariate matrix and the time variable.")
+    stop("The smooth effect must contain exactly two terms.")
   }
-  term_x <- object$term[1]
-  term_t <- object$term[2]
+  term_1 <- object$term[1]
+  term_2 <- object$term[2]
   
   si <- object$xt$si
   if( is.null(si) ){ si <- object$xt$si <- list() }
+
+  # margin 2 is a plain covariate (t) when it is a vector, or a matrix with a
+  # single column; it is treated as a nested single index (si) otherwise.
+  d2_raw <- if( is.null(dim(data[[term_2]])) ) 1L else ncol(data[[term_2]])
+  nested_2 <- d2_raw > 1L
+
+  d1 <- ncol(as.matrix(data[[term_1]]))
   
-  # =========================================================================
-  # centering to two marginal variable, and save the mean for prediction
-  # =========================================================================
-  Xi <- data[[term_x]]
-  t_vec <- data[[term_t]]
+  # sanity checks on user-supplied dims (mirrors old inter_dlinear checks)
+  if (!is.null(si$alpha_1) && length(si$alpha_1) != d1) stop(...)
+  if (!is.null(si$a0_1)    && length(si$a0_1)    != d1) stop(...)
+  if (!is.null(si$S_1) && (nrow(si$S_1) != d1 || ncol(si$S_1) != d1)) stop(...)
   
-  t_mean <- mean(t_vec)
-  data[[term_t]] <- t_vec - t_mean
-  si$t <- data[[term_t]]
-  si$tm <- t_mean 
+  # ---- margin 1: always a nested single index ------------------------------
+  res1 <- .init_marginal_si(Xi = as.matrix(data[[term_1]]),
+                            S = si$S_1, pord = si$pord_1,
+                            a0 = si$a0_1, alpha = si$alpha_1)
+  data[[term_1]] <- res1$ax
   
-  Xi <- scale(Xi, scale = FALSE)
-  si$xm <- attr(Xi, "scaled:center") #overwrite data[[term_x]] later
-  
-  di <- ncol(Xi)
-  n <- nrow(Xi)
-  
-  # =========================================================================
-  # # diag penalty matrix
-  # =========================================================================
-  Si <- si$S
-  no_pen <- is.null(Si) && is.null(si$pord)
-  
-  if( no_pen ){ 
-    # case [a]: no penalty
-    si$X <- Xi
-    si$B <- diag(nrow = ncol(Xi))
-    si$rank <- 0 
+  if( nested_2 ){
+    d2 <- ncol(as.matrix(data[[term_2]]))
+    if (!is.null(si$alpha_2) && length(si$alpha_2) != d2) stop(...)
+    if (!is.null(si$a0_2)    && length(si$a0_2)    != d2) stop(...)
+    if (!is.null(si$S_2) && (nrow(si$S_2) != d2 || ncol(si$S_2) != d2)) stop(...)
+    
+    res2 <- .init_marginal_si(Xi = as.matrix(data[[term_2]]),
+                              S = si$S_2, pord = si$pord_2,
+                              a0 = si$a0_2, alpha = si$alpha_2)
+    data[[term_2]] <- res2$ax
+    
+    si$X <- list(res1$X, res2$X)
+    si$B <- list(res1$B, res2$B)
+    si$S <- list(res1$S, res2$S)
+    si$xm    <- c(res1$xm, res2$xm)
+    si$alpha <- c(res1$alpha, res2$alpha)
+    si$a0    <- c(res1$a0, res2$a0)
+    si$rank  <- c(res1$rank, res2$rank)
+    si$na1 <- d1; si$na2 <- d2; si$na <- d1 + d2
+    
   } else {
-    if( is.null(Si) ){ 
-      # case [b]: P-splines penalty
-      Si <- .psp(d = di, ord = si$pord)
-      rankSi <- ncol(Xi) - si$pord
-    } else { 
-      # case [c]: designed penalty
-      rankSi <- rankMatrix(Si)
+    t_vec <- data[[term_2]]
+    if( !is.null(dim(t_vec)) && ncol(as.matrix(t_vec)) > 1 ){
+      stop("term[2] must be a single numeric vector when nested_2 = FALSE.")
     }
-    si <- append(si, gamFactory:::.diagPen(X = Xi, S = Si, r = rankSi))
-  }
-  
-  # =========================================================================
-  # initialize alpha and a0 with B matrix
-  # =========================================================================
-  # full_alpha = alpha + a0
-  if( is.null(si$a0) ){
-    if( no_pen ){
-      si$a0 <- rep(0, di)
-    } else {
-      si$a0 <- rep(1, di)
-    }
-  }
-  
-  if( is.null(si$alpha) ){ 
-    if( is.null(si$a0) || all(si$a0 == 0) ){
-      si$alpha <- rep(1, di) 
-    } else {
-      si$alpha <- rep(0, di) 
-    }
-  }
-  
-  si$alpha <- solve(si$B, si$alpha)
-  si$a0 <- solve(si$B, si$a0)
-  
-  # impose variance constraint: var(X * (alpha + a0)) = 1
-  tmp <- sd(si$X %*% (si$alpha + si$a0))
-  si$alpha <- si$alpha / tmp
-  si$a0 <- si$a0 / tmp
-  
-  # =========================================================================
-  # z1 = x * t(alpha) and build design matrix X_2D
-  # =========================================================================
-  ax <- drop( si$X %*% (si$alpha + si$a0) ) 
-  data[[term_x]] <- ax
-  out <- .build_n_inter_bspline_basis(object = object, data = data, knots = knots, si = si, nested = c(TRUE, FALSE))
-  
-  # # =======================================================================
-  # assemble penalty matrix
-  # =========================================================================
-  if( !no_pen ){
-    # add alpha penalty
-    dsmo <- out$bs.dim - di 
-    si <- out$xt$si
+    t_mean <- mean(t_vec)
+    data[[term_2]] <- t_vec - t_mean
+    si$t  <- data[[term_2]]
+    si$tm <- t_mean
     
-    alpha_penalty_padded <- rbind(
-      cbind(si$S, matrix(0, di, dsmo)),
-      cbind(matrix(0, dsmo, di), matrix(0, dsmo, dsmo))
-    )
-    
-    # out$S[[3]] <- alpha_penalty_padded
-    out$S[[length(out$S) + 1]] <- alpha_penalty_padded
+    si$X <- list(res1$X, NULL)
+    si$B <- list(res1$B, NULL)
+    si$S <- list(res1$S, NULL)
+    si$xm    <- res1$xm
+    si$alpha <- res1$alpha
+    si$a0    <- res1$a0
+    si$rank  <- c(res1$rank, 0)
+    si$na1 <- d1; si$na2 <- 0; si$na <- d1
+  }
   
-    out$null.space.dim <- out$null.space.dim + (out$bs.dim - si$rank)
-    out$rank <- c(out$rank, si$rank)
+  out <- .build_n_inter_bspline_basis(object = object, data = data, knots = knots,
+                                      si = si, nested = c(TRUE, nested_2))
+  
+  # ---- penalty: pad each margin's alpha penalty into bs.dim space ----------
+  .pad_alpha <- function(Sk, off, dk){
+    P <- matrix(0, out$bs.dim, out$bs.dim)
+    ii <- off + seq_len(dk)
+    P[ii, ii] <- Sk
+    P
+  }
+  added_rank <- 0
+  if( !is.null(si$S[[1]]) && isTRUE(si$rank[1] > 0) ){
+    out$S[[length(out$S)+1]] <- .pad_alpha(si$S[[1]], 0, d1)
+    out$rank <- c(out$rank, si$rank[1]); added_rank <- added_rank + si$rank[1]
+  }
+  if( nested_2 && !is.null(si$S[[2]]) && isTRUE(si$rank[2] > 0) ){
+    out$S[[length(out$S)+1]] <- .pad_alpha(si$S[[2]], d1, si$na2)
+    out$rank <- c(out$rank, si$rank[2]); added_rank <- added_rank + si$rank[2]
+  }
+  if( added_rank > 0 ){
+    out$null.space.dim <- out$null.space.dim + (out$bs.dim - added_rank)
+  }
+  
+  # ---- stack marginal si design matrices ------------------------------------
+  if( nested_2 ){
+    out$xt$si$X <- cbind(out$xt$si$X[[1]], out$xt$si$X[[2]])
+    attr(out$xt$si$X, "na1") <- d1
+    attr(out$xt$si$X, "na2") <- si$na2
+  } else {
+    out$xt$si$X <- out$xt$si$X[[1]]
   }
   
   class(out) <- c("inter_linear", "nested")
-  
-  # out$repara = FALSE
-  # out$nl.reg <- TRUE
-
   return( out )
 }
