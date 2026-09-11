@@ -9,7 +9,7 @@
 #' @noRd
 .wrap_2d_nested_basis <- function(b1, b2, nested = c(TRUE, TRUE), simplify = TRUE) {
   
-  force(b1); force(b2)
+  force(b1); force(b2);
   nested <- as.logical(nested)
   if (length(nested) == 1L) nested <- rep(nested, 2L)
   stopifnot(length(nested) == 2L, any(nested))
