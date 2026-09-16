@@ -8,8 +8,8 @@
   #   k1 <- if (length(k) >= 1 && !is.na(k[1]) && k[1] > 0) k[1] else 10
   #   k2 <- if (length(k) >= 2 && !is.na(k[2]) && k[2] > 0) k[2] else k1
   # }
-  k1 <- 10
-  k2 <- 10
+  k1 <- 14
+  k2 <- 14
 
   m <- object$p.order
   if (is.null(m) || any(is.na(m))) {

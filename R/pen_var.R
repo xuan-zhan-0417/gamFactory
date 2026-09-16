@@ -17,6 +17,8 @@ pen_var <- function(o, v, deriv = 0){
   if("nested" %in% cl){
     if("inter_dlinear" %in% cl){
       out <- .pen_var_inter_dlinear(o = o, v = v, deriv = deriv)
+    } else if("inter_le" %in% cl){
+      out <- .pen_var_inter_le(o = o, v = v, deriv = deriv)
     } else if("si" %in% cl){
       out <- .pen_var_si(o = o, v = v, deriv = deriv)
     } else {
@@ -35,6 +37,9 @@ pen_var_outer <- function(o, v, DaDr){
   if("nested" %in% cl){
     if("inter_dlinear" %in% cl){
       out <- .pen_var_inter_dlinear_outer(o = o, v = v, DaDr = DaDr)
+    } else if("inter_le" %in% cl){
+      stop("pen_var_outer.inter_le is not implemented (only needed for full ",
+           "outer Newton / DHessDrho, not for optimizer = \"efs\").")
     } else if("si" %in% cl){
       out <- .pen_var_si_outer(o = o, v = v, DaDr = DaDr)
     } else {

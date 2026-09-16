@@ -22,6 +22,9 @@ get_jacobian.nested <- function(object,data, param){
   if(class(object)[1] == "inter_mgks"){
     return(.get.jacobian.inter_mgks(object, data, param))
   }
+  if(class(object)[1] == "inter_le"){
+    return(.get.jacobian.inter_le(object, data, param))
+  }
   stop("I do not know this effect type")
   
 }
@@ -132,6 +135,27 @@ get_jacobian.nested <- function(object,data, param){
               X1beta * x_nest$xa_da, # df/da = M1%*%b * ds/da
               store$X0) # df/db = Ma 
   
+  return(list("JJ" = JJ, "xa" = x_nest$xa) )
+}
+
+.get.jacobian.inter_le <- function(object, data, param){
+
+  na <- length(object$xt$si$alpha)     # na1 + 1 + na2
+  beta <- param[ -(1:na) ]
+
+  x_nest <- Predict.matrix.nested(object, data = data, get.xa = TRUE)
+
+  store <- object$xt$basis$evalX(z1 = x_nest$z1, z2 = x_nest$z2, deriv = 1)
+
+  # df/dz_k = (dX/dz_k) %*% beta
+  f1_1 <- drop( store$X1$dz1 %*% beta )
+  f1_2 <- drop( store$X1$dz2 %*% beta )
+
+  # df/dalpha_k = (df/dz_k) * (dz_k/dalpha_k) ; cross blocks are exactly zero
+  JJ <- cbind(f1_1 * x_nest$xa_da[[1]],
+              f1_2 * x_nest$xa_da[[2]],
+              store$X0)
+
   return(list("JJ" = JJ, "xa" = x_nest$xa) )
 }
 

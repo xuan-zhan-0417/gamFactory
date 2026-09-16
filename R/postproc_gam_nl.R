@@ -26,17 +26,36 @@ postproc_gam_nl <- function(o, info) {
         n_si   <- si$n_si
         si$alpha_nexp <- as.vector(si$alpha[seq_len(n_nexp)])
         si$alpha_si   <- as.vector(si$alpha[(n_nexp + 1):(n_si + n_nexp)])
-        
+
         if (isTRUE(si$positive_si)) {
           si$alpha_si_inner <- si$alpha_si             # optimized alpha_si
           si$alpha_si_true  <- exp(si$alpha_si)        # positive alpha_si
         }
       }
-      sii$xt$si <- si 
-      
+
+      # special case inter_le, split the combined alpha back into its
+      # margin-1 (si) and margin-2 (nexp) pieces, which is what
+      # .predict.matrix.inter_le / eff_inter_le actually read.
+      has_inter_le <- "inter_le" %in% types
+      if (has_inter_le) {
+        na1 <- si$na1; na2 <- si$na2
+        si$alpha_1     <- as.vector(si$alpha[1:na1])
+        si$alpha_scale <- si$alpha[na1 + 1]
+        si$alpha_2     <- as.vector(si$alpha[(na1 + 2):(na1 + 1 + na2)])
+      }
+
+      sii$xt$si <- si
+
       # Inner smooth must be centered using original data
       needs_base_xm <- is.null(si$xm)
-      if (isTRUE(si$na2 > 0)) {
+      if (has_inter_le) {
+        # margin-1 (si) xm1 is fixed raw column means -- never needs refreshing.
+        # margin-2 (nexp) xm2 must be refreshed to mean(g) under the final
+        # fitted alpha_2, exactly as for standalone nexpsm/inter_nexp.
+        ip <- attr(Predict.matrix.nested(sii, data = o$model), "inner_linpred_unscaled")
+        si$xm2 <- si$xm2 + mean(ip[ , "z2_unscaled"])
+        sii$xt$si$xm2 <- si$xm2
+      } else if (isTRUE(si$na2 > 0)) {
         na_tot <- length(si$alpha)
         if (needs_base_xm || length(si$xm) != na_tot) {
           stop("inter_linear (nested_2 = TRUE): si$xm must be a length-", na_tot,

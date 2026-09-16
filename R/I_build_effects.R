@@ -70,7 +70,17 @@
           t     = extra$si$t,
           basis = extra$basis
         )
-        
+
+      } else if(effType[ii] == "inter_le.nested"){
+        eff[[ii]] <- eff_inter_le(
+          Xi_1  = extra$si$X_1,
+          a0_1  = extra$si$a0_1,
+          y2    = extra$si$y_raw,
+          Xi_2  = extra$si$W_2,
+          basis = extra$basis,
+          times = extra$si$times
+        )
+
       }
       else {
         stop("Don't know this effect type")

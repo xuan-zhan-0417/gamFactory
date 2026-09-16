@@ -41,7 +41,7 @@ DllkDbeta.linpreds <- function(o, llk, deriv = 1, param = NULL){
       for( ic in ir:nc ){
         cl1 <- class(o$eff[[ic]])[1]
         cl2 <- class(o$eff[[ir]])[1]
-        keep <- c("si", "stand", "inter_dlinear")
+        keep <- c("si", "stand", "inter_dlinear", "inter_le")
         if(!(cl1 %in% keep)){ cl1 <- "nexpsm" }
         if(!(cl2 %in% keep)){ cl2 <- "nexpsm" }
         Hess <- paste0(".Hess.", cl1, "_", cl2)
