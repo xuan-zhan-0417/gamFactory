@@ -12,15 +12,22 @@
 #'          to build the margin-1 single index, as in \link{trans_linear}). \code{object$term[2]}
 #'          must be a matrix with columns named
 #'          \itemize{
-#'            \item{\code{"y"}}{ exactly one column: the data to be exponentially smoothed.}
-#'            \item{\code{"intercept"}}{ exactly one column, entirely equal to 1: it multiplies
-#'                  the scaling parameter \code{alpha_scale} (see \link{trans_inter_le}).}
-#'            \item{\code{"x"}}{ \code{na_2} columns used to model the exponential smoothing
-#'                  rate, via coefficients \code{alpha_2}.}
+#'            \item{\code{"y"}}{ one or more columns: the data to be exponentially smoothed.
+#'                  Multiple columns are used when this data is observed at a higher frequency
+#'                  than the outer response (e.g. hourly readings feeding a daily model); they
+#'                  are stacked row-major into a single series of length \code{n * nrep}.}
+#'            \item{\code{"x"}}{ \code{na_2 * nrep} columns used to model the exponential
+#'                  smoothing rate, organised as \code{nrep} repeated blocks of \code{na_2}
+#'                  columns each (one block per \code{"y"} replicate). A block's own intercept,
+#'                  if wanted, is simply one of its \code{na_2} columns (there is no separate
+#'                  "intercept" column): the scaling parameter \code{alpha_scale} (see
+#'                  \link{trans_inter_le}) is a free scalar with no associated design column,
+#'                  exactly as in \link{trans_nexpsm}.}
 #'          }
-#'          An optional \code{"times"} column can be included, as in \link{trans_nexpsm}, when
-#'          the response is observed at a different frequency than the covariates driving the
-#'          smoothing rate.
+#'          As in \link{trans_nexpsm}, this replication (\code{nrep}, \code{na_2}) is inferred
+#'          from \code{ncol} of the \code{"y"} and \code{"x"} column groups, and an optional
+#'          \code{"times"} column can be included to map the high-frequency series back onto
+#'          the (lower-frequency) rows of the outer response.
 #' @importFrom MASS Null
 #' @importFrom Matrix rankMatrix
 #' @export
@@ -58,37 +65,51 @@ smooth.construct.inter_le.smooth.spec <- function(object, data, knots){
 
   # =========================================================================
   # Margin 2: exp(x) -- single-level adaptive exponential smoothing
+  #
+  # Same "y" / "x" / "times" column-name convention (and the same nrep/dXi
+  # replication) as smooth.construct.nexpsm.smooth.spec: "y" can hold several
+  # columns when the data to be smoothed is observed at a higher frequency
+  # than the outer response (e.g. hourly temperature feeding a daily model);
+  # "x" then holds nrep repeated blocks of dXi rate covariates (one block per
+  # "y" replicate -- a block's own intercept, if wanted, is just one of its
+  # dXi columns, exactly as for a plain nexpsm effect). alpha_scale has no
+  # associated design column: it is a free scalar, as in trans_nexpsm.
   # =========================================================================
   X2 <- data[[term_2]]
   if( is.null(X2) || is.null(colnames(X2)) ){
-    stop("term[2] must be a matrix with columns named 'y', 'intercept' and 'x'.")
+    stop("term[2] must be a matrix with columns named 'y' and 'x' (and, optionally, 'times').")
   }
   nms2 <- colnames(X2)
 
-  if( sum(nms2 == "y") != 1 ){
-    stop("term[2] must contain exactly one column named 'y' (the data to be smoothed).")
-  }
-  if( sum(nms2 == "intercept") != 1 ){
-    stop("term[2] must contain exactly one column named 'intercept' (a column of 1s).")
+  if( sum(nms2 == "y") < 1 ){
+    stop("term[2] must contain at least one column named 'y' (the data to be smoothed).")
   }
   if( sum(nms2 == "x") < 1 ){
     stop("term[2] must contain at least one column named 'x' (covariates for the smoothing rate).")
   }
 
-  y_raw  <- as.vector(X2[ , which(nms2 == "y")])
-  interc <- X2[ , which(nms2 == "intercept")]
-  if( !all(interc == 1) ){
-    stop("term[2] column 'intercept' must be a column of 1s.")
-  }
-  W2  <- X2[ , which(nms2 == "x"), drop = FALSE]
-  na2 <- ncol(W2)
+  n2    <- nrow(X2)
+  y_raw <- as.vector( t(X2[ , which(nms2 == "y"), drop = FALSE]) )
 
   times <- NULL
   tmp <- which(nms2 == "times")
   if( length(tmp) ){ times <- X2[ , tmp] }
 
+  W2   <- X2[ , which(nms2 == "x"), drop = FALSE]
+  nrep <- ceiling( length(y_raw) / n2 )
+  na2  <- ncol(W2) / nrep
+  if( na2 != round(na2) ){
+    stop("term[2]: the number of 'x' columns (", ncol(W2), ") must be a multiple of ",
+         "the number of 'y' columns (", nrep, ").")
+  }
+  if( nrep > 1 ){
+    tmp <- rep(1:na2, nrep)
+    W2 <- apply(W2, 1, function(z) do.call("cbind", tapply(z, tmp, I)), simplify = FALSE)
+    W2 <- do.call("rbind", W2)
+  }
+
   if( !is.null(si$alpha_2) && length(si$alpha_2) != na2 ){
-    stop("length(si$alpha_2) must equal the number of 'x' columns in term[2] (", na2, ").")
+    stop("length(si$alpha_2) must equal the number of 'x' columns per replicate in term[2] (", na2, ").")
   }
   if( !is.null(si$S_2) && (nrow(si$S_2) != na2 || ncol(si$S_2) != na2) ){
     stop("si$S_2 must be a ", na2, "x", na2, " matrix.")

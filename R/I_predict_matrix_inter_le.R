@@ -24,13 +24,21 @@
 
   # ---- margin 2: exp(x) -- same extraction as .predict.matrix.nexpsm -------
   X2   <- data[[term_2]]
+  n2   <- nrow(X2)
   nms2 <- colnames(X2)
 
-  y_raw <- as.vector(X2[ , which(nms2 == "y")])
+  y_raw <- as.vector( t(X2[ , which(nms2 == "y"), drop = FALSE]) )
   times <- NULL
   tmp <- which(nms2 == "times")
   if( length(tmp) ){ times <- X2[ , tmp] }
-  W2 <- X2[ , which(nms2 == "x"), drop = FALSE]
+
+  W2   <- X2[ , which(nms2 == "x"), drop = FALSE]
+  nrep <- ceiling( length(y_raw) / n2 )
+  if( nrep > 1 ){
+    tmp <- rep(1:na2, nrep)
+    W2 <- apply(W2, 1, function(z) do.call("cbind", tapply(z, tmp, I)), simplify = FALSE)
+    W2 <- do.call("rbind", W2)
+  }
   W2 <- W2 %*% si$B_2
 
   xsm_list <- expsmooth(y = y_raw, Xi = W2, beta = si$alpha_2, times = times, deriv = get.xa)
