@@ -36,7 +36,10 @@
 
   n <- nrow(X1)
   p1 <- ncol(X1); p2 <- ncol(X2)
-  
+
+  # Save the marginal basis dimensions on si (useful for plot)
+  si$p1 <- p1; si$p2 <- p2
+
   X_2D <- mgcv::tensor.prod.model.matrix(list(X1, X2))
   X_spline <- cbind(X1, X2, X_2D)
   
