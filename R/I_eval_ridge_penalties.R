@@ -14,6 +14,12 @@
     if("nested" %in% cl){
       if("si" %in% cl || "inter_dlinear" %in% cl){
         ipc <- 1:eff[[ii]]$na
+      } else if("inter_le" %in% cl){
+        # inner parameters are c(alpha_1, alpha_scale, alpha_2): exclude only the scaling parameter
+        ipc <- (1:eff[[ii]]$na)[ -(eff[[ii]]$na1 + 1) ]
+      } else if("inter_ee" %in% cl){
+        # exclude the two scaling parameters (first element of each margin block)
+        ipc <- (1:eff[[ii]]$na)[ -c(1, eff[[ii]]$d1 + 1) ]
       } else {
         ipc <- 2:eff[[ii]]$na
       }

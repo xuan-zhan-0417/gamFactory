@@ -138,12 +138,20 @@ trans_inter_linear <- function(
 # Specifying an interactive adaptive exponential smoothing transformation
 # 
 #' @rdname trans_xxx
+#' @details \code{trans_inter_nexp} builds \eqn{s(exp(x), t)} when the second variable is a plain vector
+#'          (\code{pord, S, alpha} refer to the exponential smooth), and \eqn{s(exp(x_1), exp(x_2))} when the
+#'          second variable is also a matrix with \code{"y"}/\code{"x"} columns. In the latter case the
+#'          margin-specific arguments \code{pord_1, S_1, alpha_1} and \code{pord_2, S_2, alpha_2} refer to
+#'          the smoothing-rate coefficients of each margin (\code{pord, S, alpha} are accepted for margin 1).
 #' @export trans_inter_nexp
 #'
 trans_inter_nexp <- function(
     pord = NULL, 
     S = NULL, 
-    alpha = NULL
+    alpha = NULL,
+    pord_1 = NULL, pord_2 = NULL,
+    S_1 = NULL, S_2 = NULL,
+    alpha_1 = NULL, alpha_2 = NULL
 ){
   
   out <- lapply(as.list(match.call())[-1], eval, envir = parent.frame())

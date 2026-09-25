@@ -32,6 +32,9 @@ Predict.matrix.nested <- function(object, data, ...){
   if(class(object)[1] == "inter_le"){
     return( .predict.matrix.inter_le(object, data, ...) )
   }
+  if(class(object)[1] == "inter_ee"){
+    return( .predict.matrix.inter_ee(object, data, ...) )
+  }
   stop("Predict.matrix.nested --- I do not know this effect type")
   
 }

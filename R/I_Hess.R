@@ -124,3 +124,41 @@
 .Hess.inter_dlinear_inter_le <- function(o1, o2, llk){
   t( .Hess.inter_le_inter_dlinear(o1 = o2, o2 = o1, llk) )
 }
+#' @noRd
+.jac_inter_ee <- function(o){
+  cbind(o$store$f1$f1_1 * o$store$g1$g1_1,
+        o$store$f1$f1_2 * o$store$g1$g1_2,
+        o$store$X0)
+}
+
+.Hess.inter_ee_stand <- function(o1, o2, llk){
+  crossprod(o2$store$X, llk$d2 * .jac_inter_ee(o1))
+}
+.Hess.stand_inter_ee <- function(o1, o2, llk){
+  t( .Hess.inter_ee_stand(o1 = o2, o2 = o1, llk) )
+}
+
+.Hess.inter_ee_inter_ee <- function(o1, o2, llk){
+  crossprod(.jac_inter_ee(o2), llk$d2 * .jac_inter_ee(o1))
+}
+
+.Hess.inter_ee_si <- .Hess.inter_ee_nexpsm <- function(o1, o2, llk){
+  crossprod(.jac_si_like(o2), llk$d2 * .jac_inter_ee(o1))
+}
+.Hess.si_inter_ee <- .Hess.nexpsm_inter_ee <- function(o1, o2, llk){
+  t( .Hess.inter_ee_si(o1 = o2, o2 = o1, llk) )
+}
+
+.Hess.inter_ee_inter_dlinear <- function(o1, o2, llk){
+  crossprod(.jac_inter_dlinear(o2), llk$d2 * .jac_inter_ee(o1))
+}
+.Hess.inter_dlinear_inter_ee <- function(o1, o2, llk){
+  t( .Hess.inter_ee_inter_dlinear(o1 = o2, o2 = o1, llk) )
+}
+
+.Hess.inter_ee_inter_le <- function(o1, o2, llk){
+  crossprod(.jac_inter_le(o2), llk$d2 * .jac_inter_ee(o1))
+}
+.Hess.inter_le_inter_ee <- function(o1, o2, llk){
+  t( .Hess.inter_ee_inter_le(o1 = o2, o2 = o1, llk) )
+}

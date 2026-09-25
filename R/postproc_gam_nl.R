@@ -44,6 +44,18 @@ postproc_gam_nl <- function(o, info) {
         si$alpha_2     <- as.vector(si$alpha[(na1 + 2):(na1 + 1 + na2)])
       }
 
+      # special case inter_ee: split the combined alpha back into the two margin blocks
+      # c(alpha_scale_1, alpha_w_1, alpha_scale_2, alpha_w_2), which is what
+      # .predict.matrix.inter_ee actually reads.
+      has_inter_ee <- "inter_ee" %in% types
+      if (has_inter_ee) {
+        d1 <- si$d1; d2 <- si$d2
+        si$alpha_scale_1 <- si$alpha[1]
+        si$alpha_w_1     <- as.vector(si$alpha[2:d1])
+        si$alpha_scale_2 <- si$alpha[d1 + 1]
+        si$alpha_w_2     <- as.vector(si$alpha[(d1 + 2):(d1 + d2)])
+      }
+
       sii$xt$si <- si
 
       # Inner smooth must be centered using original data
@@ -54,6 +66,13 @@ postproc_gam_nl <- function(o, info) {
         # fitted alpha_2, exactly as for standalone nexpsm/inter_nexp.
         ip <- attr(Predict.matrix.nested(sii, data = o$model), "inner_linpred_unscaled")
         si$xm2 <- si$xm2 + mean(ip[ , "z2_unscaled"])
+        sii$xt$si$xm2 <- si$xm2
+      } else if (has_inter_ee) {
+        # refresh xm1/xm2 to mean(g_k) under the final fitted parameters, as for nexpsm
+        ip <- attr(Predict.matrix.nested(sii, data = o$model), "inner_linpred_unscaled")
+        si$xm1 <- si$xm1 + mean(ip[ , "z1_unscaled"])
+        si$xm2 <- si$xm2 + mean(ip[ , "z2_unscaled"])
+        sii$xt$si$xm1 <- si$xm1
         sii$xt$si$xm2 <- si$xm2
       } else if (isTRUE(si$na2 > 0)) {
         na_tot <- length(si$alpha)

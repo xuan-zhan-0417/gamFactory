@@ -71,6 +71,17 @@
           basis = extra$basis
         )
 
+      } else if(effType[ii] == "inter_ee.nested"){
+        eff[[ii]] <- eff_inter_ee(
+          y1      = extra$si$y_raw_1,
+          Xi_1    = extra$si$W_1,
+          y2      = extra$si$y_raw_2,
+          Xi_2    = extra$si$W_2,
+          basis   = extra$basis,
+          times_1 = extra$si$times_1,
+          times_2 = extra$si$times_2
+        )
+
       } else if(effType[ii] == "inter_le.nested"){
         eff[[ii]] <- eff_inter_le(
           Xi_1  = extra$si$X_1,

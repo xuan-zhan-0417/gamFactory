@@ -7,5 +7,18 @@
 \method{smooth.construct}{inter_nexp.smooth.spec}(object, data, knots)
 }
 \description{
-Nested interactive adaptive exponential smoothing effect
+Builds either
+\itemize{
+\item{\code{s(exp(x), t)}}{ (class \code{"inter_nexp"}): \code{object$term[1]} is a matrix with
+columns named \code{"y"}, \code{"x"} (and optionally \code{"times"}), and \code{object$term[2]}
+is a plain (non-nested) vector \code{t}.}
+\item{\code{s(exp(x1), exp(x2))}}{ (class \code{"inter_ee"}): both \code{object$term[1]} and
+\code{object$term[2]} are matrices with columns named \code{"y"}, \code{"x"} (and optionally
+\code{"times"}). The two-sided case is detected automatically from the column names of
+\code{object$term[2]}.}
+}
+In the two-sided case, margin-specific initial values / penalties are passed via
+\code{pord_1, S_1, alpha_1} (margin 1) and \code{pord_2, S_2, alpha_2} (margin 2), see \link{trans_inter_nexp}.
+As in \link{trans_nexpsm}, each margin has a free scaling parameter (no design column) which is
+followed by the smoothing-rate coefficients; an intercept for the rate is just one of the \code{"x"} columns.
 }

@@ -19,13 +19,20 @@ data column, and only the smoothing rate is modelled via covariates.
 to build the margin-1 single index, as in \link{trans_linear}). \code{object$term[2]}
 must be a matrix with columns named
 \itemize{
-\item{\code{"y"}}{ exactly one column: the data to be exponentially smoothed.}
-\item{\code{"intercept"}}{ exactly one column, entirely equal to 1: it multiplies
-the scaling parameter \code{alpha_scale} (see \link{trans_inter_le}).}
-\item{\code{"x"}}{ \code{na_2} columns used to model the exponential smoothing
-rate, via coefficients \code{alpha_2}.}
+\item{\code{"y"}}{ one or more columns: the data to be exponentially smoothed.
+Multiple columns are used when this data is observed at a higher frequency
+than the outer response (e.g. hourly readings feeding a daily model); they
+are stacked row-major into a single series of length \code{n * nrep}.}
+\item{\code{"x"}}{ \code{na_2 * nrep} columns used to model the exponential
+smoothing rate, organised as \code{nrep} repeated blocks of \code{na_2}
+columns each (one block per \code{"y"} replicate). A block's own intercept,
+if wanted, is simply one of its \code{na_2} columns (there is no separate
+"intercept" column): the scaling parameter \code{alpha_scale} (see
+\link{trans_inter_le}) is a free scalar with no associated design column,
+exactly as in \link{trans_nexpsm}.}
 }
-An optional \code{"times"} column can be included, as in \link{trans_nexpsm}, when
-the response is observed at a different frequency than the covariates driving the
-smoothing rate.
+As in \link{trans_nexpsm}, this replication (\code{nrep}, \code{na_2}) is inferred
+from \code{ncol} of the \code{"y"} and \code{"x"} column groups, and an optional
+\code{"times"} column can be included to map the high-frequency series back onto
+the (lower-frequency) rows of the outer response.
 }
