@@ -1,0 +1,44 @@
+diff --git a/R/I_eval_ridge_penalties.R b/R/I_eval_ridge_penalties.R
+index 7d8b08a..23427c8 100644
+--- a/R/I_eval_ridge_penalties.R
++++ b/R/I_eval_ridge_penalties.R
+@@ -24,6 +24,13 @@
+         ipc <- 2:eff[[ii]]$na
+       }
+         pen[[kk]] <- pen_ridge_var(o = eff[[ii]], extra = extra, ipc = ipc, deriv = deriv)
++        if( effType[ii] == "inter_mgksnested" ){
++          # The log-likelihood grows with n but lamRidge does not. For the kernel bandwidths this leaves the
++          # objective flat once the kernel degenerates to nearest-neighbour (bandwidths -> Inf), and one early
++          # Newton step can land there. Multiply lamRidge by n: negligible at the optimum (curvature >> n),
++          # but it blocks that jump. Used as lamRidge * pen$w in build_family_nl.
++          pen[[kk]]$w <- nrow(extra$si$dist[[1]])
++        }
+     }
+     
+     pen[[kk]]$iec <- aii 
+diff --git a/R/build_family_nl.R b/R/build_family_nl.R
+index 260e5f9..192ae02 100644
+--- a/R/build_family_nl.R
++++ b/R/build_family_nl.R
+@@ -156,7 +156,8 @@ build_family_nl <- function(bundle, info, lamVar = 1e5, lamRidge = 1e-2){
+       npen <- length(pen) 
+       if( npen ){
+         for(ii in 1:npen){
+-          ret$l <- ret$l - lamVar * pen[[ii]]$d0 - lamRidge * pen_ridge[[ii]]$d0
++          lamR <- lamRidge * if( is.null(pen_ridge[[ii]]$w) ) 1 else pen_ridge[[ii]]$w   # effect-specific ridge multiplier
++          ret$l <- ret$l - lamVar * pen[[ii]]$d0 - lamR * pen_ridge[[ii]]$d0
+           
+         }
+       }
+@@ -175,8 +176,9 @@ build_family_nl <- function(bundle, info, lamVar = 1e5, lamRidge = 1e-2){
+         if( npen ){
+           for(ii in 1:npen){
+             zz <- pen[[ii]]$iec
+-            ret$lb[zz] <- ret$lb[zz] - lamVar * pen[[ii]]$d1 - lamRidge * pen_ridge[[ii]]$d1
+-            ret$lbb[zz, zz] <- ret$lbb[zz, zz] - lamVar * pen[[ii]]$d2 - lamRidge * pen_ridge[[ii]]$d2
++            lamR <- lamRidge * if( is.null(pen_ridge[[ii]]$w) ) 1 else pen_ridge[[ii]]$w
++            ret$lb[zz] <- ret$lb[zz] - lamVar * pen[[ii]]$d1 - lamR * pen_ridge[[ii]]$d1
++            ret$lbb[zz, zz] <- ret$lbb[zz, zz] - lamVar * pen[[ii]]$d2 - lamR * pen_ridge[[ii]]$d2
+           }
+         }
+         
