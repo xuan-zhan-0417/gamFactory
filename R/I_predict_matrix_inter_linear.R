@@ -1,6 +1,6 @@
 #' Predict using 2D inter linear effects (ANOVA Tensor Product)
 #'
-#' Handles both sub-cases produced by \code{smooth.construct.inter_linear.smooth.spec}:
+#' Handles both sub-cases produced by \code{smooth.construct.inter.smooth.spec} (margins si|plain and si|si):
 #' margin 2 nested (\code{s(si(x1), si(x2))}, \code{si$na2 > 0}) and margin 2
 #' plain (\code{s(si(x1), t)}, \code{si$na2 == 0}).
 #'

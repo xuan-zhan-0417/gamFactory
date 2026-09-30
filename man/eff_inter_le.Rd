@@ -8,7 +8,7 @@ eff_inter_le(Xi_1, a0_1 = NULL, y2, Xi_2, basis, times = NULL)
 }
 \arguments{
 \item{Xi_1}{margin-1 (single index) design matrix, already centred and
-rotated (as produced by \link{smooth.construct.inter_le.smooth.spec}).}
+rotated (as produced by \link{smooth.construct.inter.smooth.spec}).}
 
 \item{a0_1}{fixed initialisation shift for margin 1 (length \code{ncol(Xi_1)}).}
 

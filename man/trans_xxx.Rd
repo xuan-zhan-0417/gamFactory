@@ -5,10 +5,7 @@
 \alias{trans_mgks}
 \alias{trans_nexpsm}
 \alias{trans_linear_nexpsm}
-\alias{trans_inter_linear}
-\alias{trans_inter_nexp}
-\alias{trans_inter_mgks}
-\alias{trans_inter_le}
+\alias{trans_inter}
 \title{Specifying inner transformations}
 \usage{
 trans_linear(pord, S, alpha, a0)
@@ -33,18 +30,8 @@ trans_linear_nexpsm(
   positive_si = FALSE
 )
 
-trans_inter_linear(
-  pord_1 = NULL,
-  pord_2 = NULL,
-  S_1 = NULL,
-  S_2 = NULL,
-  alpha_1 = NULL,
-  alpha_2 = NULL,
-  a0_1 = NULL,
-  a0_2 = NULL
-)
-
-trans_inter_nexp(
+trans_inter(
+  margins = c("auto", "auto"),
   pord = NULL,
   S = NULL,
   alpha = NULL,
@@ -53,19 +40,9 @@ trans_inter_nexp(
   S_1 = NULL,
   S_2 = NULL,
   alpha_1 = NULL,
-  alpha_2 = NULL
-)
-
-trans_inter_mgks(pord = NULL, S = NULL, alpha = NULL)
-
-trans_inter_le(
-  pord_1 = NULL,
-  pord_2 = NULL,
-  S_1 = NULL,
-  S_2 = NULL,
-  alpha_1 = NULL,
   alpha_2 = NULL,
   a0_1 = NULL,
+  a0_2 = NULL,
   alpha_scale = NULL
 )
 }
@@ -84,11 +61,8 @@ by the optimiser.}
 
 \item{y0}{Vector of \eqn{n} observations corresponding to the rows of the variables in \code{s_nest}.}
 
-\item{pord_1}{As \code{pord}, but for margin 1 (the single index \code{si(x)}) of an
-interactive transformation.}
-
-\item{pord_2}{As \code{pord}, but for the covariates driving the adaptive smoothing
-rate of margin 2 (\code{exp(x)}) of an interactive transformation.}
+\item{pord_1, pord_2}{As \code{pord}, but for margin 1 / margin 2 of an interactive transformation. For an
+\code{"exp"} margin the penalty acts on the smoothing-rate coefficients only.}
 
 \item{S_si}{Penalty matrix used in trans_linear_nexpsm. For the linear transformation parameters.}
 
@@ -98,29 +72,25 @@ rate of margin 2 (\code{exp(x)}) of an interactive transformation.}
 
 \item{alpha_si}{Initial values used in trans_linear_nexpsm. For linear transformation parameters.}
 
-\item{alpha_scale}{Initial value for the scaling parameter multiplying the (centred)
-output of the adaptive exponential smooth of margin 2 (\code{exp(x)}).}
+\item{alpha_scale}{Initial value for the scaling parameter of the \code{"exp"} margin 2 (which multiplies the
+centred output of the exponential smooth).}
 
 \item{n_si}{Length of \code{alpha_si} if \code{alpha_si} is not provided.}
 
 \item{n_nexp}{Length of \code{alpha_nexp} if \code{alpha_nexp} is not provided.}
 
-\item{S_1}{As \code{S}, but for margin 1 (the single index \code{si(x)}) of an
-interactive transformation.}
+\item{margins}{Character vector of length 2 giving the type of each margin of an interactive
+transformation: one of \code{"si"} (single index), \code{"exp"} (adaptive exponential smooth),
+\code{"mgks"} (kernel smooth), \code{"plain"} (ordinary covariate) or \code{"auto"}
+(inferred from the shape / column names of the term, the default). Supported combinations are
+listed in \link{smooth.construct.inter.smooth.spec}.}
 
-\item{S_2}{As \code{S}, but for the covariates driving the adaptive smoothing
-rate of margin 2 (\code{exp(x)}) of an interactive transformation.}
+\item{S_1, S_2}{As \code{S}, but for margin 1 / margin 2.}
 
-\item{alpha_1}{As \code{alpha}, but for margin 1 (the single index \code{si(x)}) of an
-interactive transformation.}
+\item{alpha_1, alpha_2}{Initial values for the inner coefficients of margin 1 / margin 2 (for an \code{"exp"}
+margin: the smoothing-rate coefficients, one per column of \code{"x"} within a replicate).}
 
-\item{alpha_2}{Initial values for the coefficients of the covariates driving the
-adaptive smoothing rate of margin 2 (\code{exp(x)}) of an interactive
-transformation. Its length must equal the number of columns named
-\code{"x"} in the matrix corresponding to margin 2.}
-
-\item{a0_1}{As \code{a0}, but for margin 1 (the single index \code{si(x)}) of an
-interactive transformation.}
+\item{a0_1, a0_2}{Fixed initialisation shifts of the coefficients of a \code{"si"} margin.}
 }
 \description{
 Functions to specify nested covariate transformations, to be used
@@ -137,9 +107,12 @@ The types of transformations currently provided are:
 \item{\code{trans_linear_nexpsm}{ a combination of a linear transformation and an exponential smoothing transformation.}}
 }
 
-\code{trans_inter_nexp} builds \eqn{s(exp(x), t)} when the second variable is a plain vector
-(\code{pord, S, alpha} refer to the exponential smooth), and \eqn{s(exp(x_1), exp(x_2))} when the
-second variable is also a matrix with \code{"y"}/\code{"x"} columns. In the latter case the
-margin-specific arguments \code{pord_1, S_1, alpha_1} and \code{pord_2, S_2, alpha_2} refer to
-the smoothing-rate coefficients of each margin (\code{pord, S, alpha} are accepted for margin 1).
+\code{trans_inter} specifies any of the two-margin nested interactions
+\eqn{s(si(x), t)}, \eqn{s(si(x_1), si(x_2))}, \eqn{s(si(x), exp(x))}, \eqn{s(exp(x), t)},
+\eqn{s(exp(x_1), exp(x_2))} and \eqn{s(mgks(x), t)}. With the default \code{margins = c("auto", "auto")}
+the structure is inferred from the two terms passed to \link{s_nest}: a matrix with columns named
+\code{"y"} and \code{"x"} is an \code{"exp"} margin, one with \code{"y"} and \code{"d1"}, \code{"d2"}, ...
+is an \code{"mgks"} margin, any other matrix is a \code{"si"} margin, and a vector is a \code{"plain"}
+margin. For backward compatibility \code{pord}, \code{S} and \code{alpha} are accepted for margin 1
+of an \code{"exp"} or \code{"mgks"} margin.
 }

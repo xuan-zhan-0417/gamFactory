@@ -1,5 +1,5 @@
 
-# used in smooth.construct_inter_dlinear_smooth_spec.R
+# used in smooth.construct.inter.smooth.spec (R/smooth_construct_inter_smooth_spec.R)
 # build the marginal si for each variable
 # including centering, diagonalization, and initialization of alpha and a0
 

@@ -2,7 +2,7 @@
 #' Build si(x) / exp(x) interaction effect
 #'
 #' @param Xi_1 margin-1 (single index) design matrix, already centred and
-#'             rotated (as produced by \link{smooth.construct.inter_le.smooth.spec}).
+#'             rotated (as produced by \link{smooth.construct.inter.smooth.spec}).
 #' @param a0_1 fixed initialisation shift for margin 1 (length \code{ncol(Xi_1)}).
 #' @param y2 data to be exponentially smoothed for margin 2.
 #' @param Xi_2 margin-2 design matrix (rate covariates), already rotated.
