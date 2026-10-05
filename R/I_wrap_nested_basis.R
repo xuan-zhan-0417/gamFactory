@@ -32,3 +32,21 @@
 
   return(out)
 }
+
+# The 1D outer basis in the layout of the 2D one (.wrap_2d_nested_basis), so that the generic code treats both
+# the same way: evalX(z1, deriv) returns X0 and the lists X1 = list(dz1), X2 = list(dz1_z1), X3 = list(dz1_z1_z1)
+.wrap_1d_nested_basis <- function(b){
+
+  force(b)
+
+  evalX <- function(z1, deriv = 0){
+    o <- b$evalX(x = z1, deriv = deriv)
+    out <- list(X0 = o$X0)
+    if( deriv >= 1 ){ out$X1 <- list(dz1 = o$X1) }
+    if( deriv >= 2 ){ out$X2 <- list(dz1_z1 = o$X2) }
+    if( deriv >= 3 ){ out$X3 <- list(dz1_z1_z1 = o$X3) }
+    out
+  }
+
+  list(evalX = evalX)
+}

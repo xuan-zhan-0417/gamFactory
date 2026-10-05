@@ -62,7 +62,6 @@
   
   # pad 0 to X_2D and S_inter
   di <- length(si$alpha)
-  if (isTRUE(di == 0)) {di <- length(si$alpha_1) + length(si$alpha_2) }
   dsmo_total <- ncol(X_spline)
   X_final <- cbind(matrix(0, n, di), X_spline)
   pad_mat   <- matrix(0, di, di)

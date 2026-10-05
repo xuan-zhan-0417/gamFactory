@@ -1,103 +1,12 @@
 ############################
-############################
-# Returns list of effects 
+# Returns list of effects: standard (eff_stand) or nested (eff_nest)
 #
 .build_effects <- function(X, info, outer){
-  effType <- sapply(info$type, paste0, collapse = '.')
-  ne <- length(effType)
-  eff <- list()
-  
-  for(ii in 1:ne){
-    iec <- info$iec[[ii]]
-    
-    if(effType[ii] == "stand"){
-      eff[[ii]] <- eff_stand(X[ , iec, drop = FALSE])
-      
+  lapply(seq_along(info$type), function(ii){
+    if( info$type[[ii]][1] == "stand" ){
+      eff_stand(X[ , info$iec[[ii]], drop = FALSE])
     } else {
-      extra <- info$extra[[ii]]
-      Xi <- extra$si$X
-      
-      if(effType[ii] == "si.nested"){
-        eff[[ii]] <- eff_si(Xi = Xi, basis = extra$basis, a0 = extra$si$a0)
-        
-      } else if(effType[ii] == "si_nexpsm.nested"){
-        eff[[ii]] <- eff_si_nexp(
-          X_si        = extra$si$X_si,
-          X_nexp      = extra$si$X_nexp,
-          basis       = extra$basis,
-          times       = extra$si$times,
-          alpha_center = extra$si$alpha_center,
-          Z0          = extra$si$Z0,
-          positive_si = extra$si$positive_si
-        )
-        
-      } else if(effType[ii] == "nexpsm.nested"){
-        eff[[ii]] <- eff_nexpsm(
-          y     = extra$si$x,
-          Xi    = Xi,
-          basis = extra$basis,
-          times = extra$si$times
-        )
-        
-      } else if(effType[ii] == "mgks.nested"){
-        eff[[ii]] <- eff_mgks(
-          y     = extra$si$x,
-          dist  = extra$si$dist,
-          basis = extra$basis
-        )
-        
-      } else if(effType[ii] == "inter_linear.nested"){
-        eff[[ii]] <- eff_inter_linear(
-          Xi    = Xi,
-          basis = extra$basis,
-          a0    = extra$si$a0,
-          t     = extra$si$t
-        )
-
-      } else if(effType[ii] == "inter_nexp.nested"){
-        eff[[ii]] <- eff_inter_nexp(
-          y     = extra$si$x_raw,
-          Xi    = Xi,
-          t     = extra$si$t,
-          basis = extra$basis,
-          times = extra$si$times
-        )
-        
-      }else if(effType[ii] == "inter_mgks.nested"){
-        eff[[ii]] <- eff_inter_mgks(
-          y     = extra$si$x,
-          dist  = extra$si$dist,
-          t     = extra$si$t,
-          basis = extra$basis
-        )
-
-      } else if(effType[ii] == "inter_ee.nested"){
-        eff[[ii]] <- eff_inter_ee(
-          y1      = extra$si$y_raw_1,
-          Xi_1    = extra$si$W_1,
-          y2      = extra$si$y_raw_2,
-          Xi_2    = extra$si$W_2,
-          basis   = extra$basis,
-          times_1 = extra$si$times_1,
-          times_2 = extra$si$times_2
-        )
-
-      } else if(effType[ii] == "inter_le.nested"){
-        eff[[ii]] <- eff_inter_le(
-          Xi_1  = extra$si$X_1,
-          a0_1  = extra$si$a0_1,
-          y2    = extra$si$y_raw,
-          Xi_2  = extra$si$W_2,
-          basis = extra$basis,
-          times = extra$si$times
-        )
-
-      }
-      else {
-        stop("Don't know this effect type")
-      }
+      eff_nest(margin = info$extra[[ii]]$si$margin, basis = info$extra[[ii]]$basis)
     }
-  }
-  
-  return(eff)
+  })
 }

@@ -146,9 +146,9 @@ s_nest <- function(..., trans, k, m, sarg){
 
   if( is.null(sarg$xt) ){ sarg$xt <- list() }
   sarg$xt$sumConv <- FALSE
-  sarg$bs <- trans$type
-  trans$type <- NULL
-  if( length(trans) ){ sarg$xt$si <- trans }
+  # one constructor for all nested effects; the inner transformation of each term (one, or two for trans_inter)
+  sarg$bs <- "nest"
+  sarg$xt$si <- list(trans = if( trans$type == "inter" ) trans$trans else list(trans))
   
   if( missing(k) ){
     k <- 10 + 7 # Because we impose 7 constraints

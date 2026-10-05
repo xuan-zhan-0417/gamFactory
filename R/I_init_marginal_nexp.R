@@ -1,4 +1,4 @@
-# Sibling of R/I_init_marginal_si.R: initialisation of one exp margin (used by .inter_init_exp).
+# Sibling of R/I_init_marginal_si.R: initialisation of one exp margin (used by bundle_exp, R/bundle_exp.R).
 
 # ---------------------------------------------------------------------------
 # One adaptive exponential smooth margin: same "y" / "x" / "times" conventions and nrep
@@ -60,6 +60,6 @@
   if( is.null(alpha_scale) ){ alpha_scale <- log(1 / sd(g)) }   # sd(inner index) = 1 at the start
   gm <- mean(g)
 
-  list(z = exp(alpha_scale) * (g - gm), y_raw = y_raw, W = W_rot, W_raw = W, B = B, S = S_out, rank = rank_S,
-       times = times, na = na, alpha_scale = alpha_scale, alpha_w = alpha_w, xm = gm, no_pen = no_pen)
+  list(z = exp(alpha_scale) * (g - gm), y_raw = y_raw, W = W_rot, B = B, S = S_out, rank = rank_S,
+       times = times, alpha_scale = alpha_scale, alpha_w = alpha_w, xm = gm)
 }

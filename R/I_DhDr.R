@@ -2,6 +2,8 @@
 ###
 .DHDr <- function(o, llk, DbDr, index){
   
+  o <- lapply(o, function(e) if( inherits(e, "nest") ) .nest_as_1d(e) else e)
+  
   neff <- length( unique(index) )
   
   # Only one effect involved: call effect-specific method
@@ -19,6 +21,24 @@
   
   return( out )
   
+}
+
+# Third derivatives are coded for effects with one nested index: a nested effect with one margin with inner
+# parameters (the other, if any, is plain). It is handed to that code in its layout: class "si" if the margin is
+# linear in its parameters (DHessDrho.si), "nexpsm" otherwise (DHessDrho.nexpsm).
+.nest_as_1d <- function(o){
+  if( length(o$nest) > 1 ){
+    stop("Outer Newton optimisation is not available for nested effects with two nested margins: ",
+         "use optimizer = \"efs\".")
+  }
+  s  <- o$store
+  o1 <- .nest_margin_view(o, 1)
+  o1$param <- o$param
+  o1$store <- c(o1$store, list(X0 = s$X0, X1 = s$X1[[1]], X2 = s$X2[[1]], X3 = s$X3[[1]],
+                               f1 = s$f1[[1]], f2 = s$f2[[1]][[1]], f3 = drop(s$X3[[1]] %*% o$param[-(1:o$na)]),
+                               Xi = s$g1[[1]]))
+  class(o1) <- c(if( .nest_bundle(o$margin[[o$nest]]$bundle_nam)$linear ) "si" else "nexpsm", "nested")
+  o1
 }
 
 .transEta <- function(eta, o, ii){

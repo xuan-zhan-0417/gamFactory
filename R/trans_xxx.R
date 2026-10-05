@@ -29,7 +29,7 @@
 #'                       a linear effect.}}
 #'  \item{\code{trans_mgks}{ a multivariate kernel smooth transformation based on the response variable observation 
 #'                          vector \code{y0} and corresponding distance matrix.}}
-#'  \item{\code{trans_nexpsm}{ an exponential smoothing transformation.}}
+#'  \item{\code{trans_nexpsm}{ an exponential smoothing transformation (\code{trans_exp} is the same function).}}
 #'  \item{\code{trans_linear_nexpsm}{ a combination of a linear transformation and an exponential smoothing transformation.}}
 #' }
 #' @export trans_linear
@@ -74,14 +74,19 @@ trans_mgks <- function(y0, alpha){
 #' @rdname trans_xxx
 #' @export trans_nexpsm
 #'
-trans_nexpsm <- function(S, alpha){
-  
+trans_nexpsm <- function(pord, S, alpha, alpha_scale){
+
   out <- lapply(as.list(match.call())[-1], eval, envir = parent.frame())
-  out$type <- "nexpsm"
-  
+  out$type <- "exp"
+
   return(out)
-  
-} 
+
+}
+
+#' @rdname trans_xxx
+#' @export trans_exp
+#'
+trans_exp <- trans_nexpsm
 
 #
 # Specifying linear transform + exponential smooth transformation 
@@ -112,52 +117,46 @@ trans_linear_nexpsm <- function(
   }
   
   out <- as.list(environment())
-  out$type <- "si_nexpsm"
+  out$type <- "si_nexp"
   return(out)
 }
 
 
 #
 # Specifying a two-margin nested interaction, s(m_1, m_2)
-# (see smooth.construct.inter.smooth.spec)
+# (see smooth.construct.nest.smooth.spec)
 #
 #' @rdname trans_xxx
 #'
-#' @param margins Character vector of length 2 giving the type of each margin of an interactive
-#'                transformation: one of \code{"si"} (single index), \code{"exp"} (adaptive exponential smooth),
-#'                \code{"mgks"} (kernel smooth), \code{"plain"} (ordinary covariate) or \code{"auto"}
-#'                (inferred from the shape / column names of the term, the default). Supported combinations are
-#'                listed in \link{smooth.construct.inter.smooth.spec}.
-#' @param pord_1,pord_2 As \code{pord}, but for margin 1 / margin 2 of an interactive transformation. For an
-#'                      \code{"exp"} margin the penalty acts on the smoothing-rate coefficients only.
-#' @param S_1,S_2 As \code{S}, but for margin 1 / margin 2.
-#' @param alpha_1,alpha_2 Initial values for the inner coefficients of margin 1 / margin 2 (for an \code{"exp"}
-#'                        margin: the smoothing-rate coefficients, one per column of \code{"x"} within a replicate).
-#' @param a0_1,a0_2 Fixed initialisation shifts of the coefficients of a \code{"si"} margin.
-#' @param alpha_scale Initial value for the scaling parameter of the \code{"exp"} margin 2 (which multiplies the
-#'                    centred output of the exponential smooth).
+#' @param margin1,margin2 Transformation of margin 1 / margin 2 of an interactive transformation: the output of
+#'                        \code{trans_linear} (single index), \code{trans_exp} (adaptive exponential smooth),
+#'                        \code{trans_mgks} (kernel smooth) or \code{trans_plain} (ordinary covariate), whose
+#'                        \code{type} selects the margin's bundle (\link{nest_bundles}). \code{NULL} (default):
+#'                        inferred from the shape / column names of the term. Supported combinations are listed in
+#'                        \link{smooth.construct.nest.smooth.spec}.
+#' @param alpha_scale Initial value for the scaling parameter of an exponential smooth (which multiplies the
+#'                    centred output of the exponential smooth). In \code{trans_nexpsm}, \code{pord} and \code{S}
+#'                    penalise the smoothing-rate coefficients only.
 #'
 #' @details \code{trans_inter} specifies any of the two-margin nested interactions
 #'          \eqn{s(si(x), t)}, \eqn{s(si(x_1), si(x_2))}, \eqn{s(si(x), exp(x))}, \eqn{s(exp(x), t)},
-#'          \eqn{s(exp(x_1), exp(x_2))} and \eqn{s(mgks(x), t)}. With the default \code{margins = c("auto", "auto")}
-#'          the structure is inferred from the two terms passed to \link{s_nest}: a matrix with columns named
-#'          \code{"y"} and \code{"x"} is an \code{"exp"} margin, one with \code{"y"} and \code{"d1"}, \code{"d2"}, ...
-#'          is an \code{"mgks"} margin, any other matrix is a \code{"si"} margin, and a vector is a \code{"plain"}
-#'          margin. For backward compatibility \code{pord}, \code{S} and \code{alpha} are accepted for margin 1
-#'          of an \code{"exp"} or \code{"mgks"} margin.
+#'          \eqn{s(exp(x_1), exp(x_2))} and \eqn{s(mgks(x), t)}, e.g.
+#'          \code{s_nest(X, E, trans = trans_inter(trans_linear(pord = 1), trans_exp()))}. A margin left to
+#'          \code{NULL} is inferred from its term: a matrix with columns named \code{"y"} and \code{"x"} is an
+#'          exponential smooth, one with \code{"y"} and \code{"d1"}, \code{"d2"}, ... a kernel smooth, any other
+#'          matrix a single index and a vector a plain covariate. The arguments of \code{trans_linear},
+#'          \code{trans_exp} and \code{trans_mgks} apply to that margin only; for \code{trans_exp} the penalty
+#'          acts on the smoothing-rate coefficients and \code{alpha} has one element per column \code{"x"}
+#'          within a replicate.
 #' @export trans_inter
 #'
-trans_inter <- function(
-    margins = c("auto", "auto"),
-    pord = NULL, S = NULL, alpha = NULL,
-    pord_1 = NULL, pord_2 = NULL,
-    S_1 = NULL, S_2 = NULL,
-    alpha_1 = NULL, alpha_2 = NULL,
-    a0_1 = NULL, a0_2 = NULL,
-    alpha_scale = NULL
-){
-  out <- lapply(as.list(match.call())[-1], eval, envir = parent.frame())
-  out$type <- "inter"
-  out$margins <- margins
-  return(out)
+trans_inter <- function(margin1 = NULL, margin2 = NULL){
+  list(type = "inter", trans = list(margin1, margin2))
+}
+
+#' @rdname trans_xxx
+#' @export trans_plain
+#'
+trans_plain <- function(){
+  list(type = "plain")
 }

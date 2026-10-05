@@ -3,11 +3,11 @@
 #' @param b1,b2 marginal bases, each exposing evalX(x, deriv).
 #' @param nested logical, length 2: which margins are single indices and
 #'               therefore need derivatives. Recycled if length 1.
-#' @param simplify if TRUE and exactly one margin is nested, X1/X2/X3 are
-#'                 returned as bare matrices instead of one-element lists,
-#'                 preserving the single-sided API (store$X1 %*% beta).
+#' @return list with evalX(z1, z2, deriv): X0, and for deriv >= 1 the lists X1, X2, X3 of
+#'         derivatives w.r.t. the nested margins, named "dz1", "dz1_z2", ... (one element per
+#'         nested direction, even when only one margin is nested).
 #' @noRd
-.wrap_2d_nested_basis <- function(b1, b2, nested = c(TRUE, TRUE), simplify = TRUE) {
+.wrap_2d_nested_basis <- function(b1, b2, nested = c(TRUE, TRUE)) {
   
   force(b1); force(b2);
   nested <- as.logical(nested)
@@ -62,7 +62,7 @@
     if (deriv >= 1) {
       g <- lapply(idx, blk_dirs)
       names(g) <- paste0("dz", idx)
-      out_2d$X1 <- if (simplify && length(idx) == 1L) g[[1]] else g
+      out_2d$X1 <- g
     }
     
     ## 二阶：嵌套方向的所有有序配对；对称的名字指向同一个缓存块
@@ -71,7 +71,7 @@
       for (i in idx) for (j in idx) {
         h[[paste0("dz", i, "_z", j)]] <- blk_dirs(c(i, j))
       }
-      out_2d$X2 <- if (simplify && length(idx) == 1L) h[[1]] else h
+      out_2d$X2 <- h
     }
     
     ## 三阶：同理，两侧嵌套时 8 个命名条目最多只对应 4 个不同的块
@@ -80,7 +80,7 @@
       for (i in idx) for (j in idx) for (k in idx) {
         t3[[paste0("dz", i, "_z", j, "_z", k)]] <- blk_dirs(c(i, j, k))
       }
-      out_2d$X3 <- if (simplify && length(idx) == 1L) t3[[1]] else t3
+      out_2d$X3 <- t3
     }
     
     out_2d

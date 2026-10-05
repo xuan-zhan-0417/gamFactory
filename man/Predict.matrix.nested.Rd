@@ -4,7 +4,15 @@
 \alias{Predict.matrix.nested}
 \title{Predict using nested effects}
 \usage{
-\method{Predict.matrix}{nested}(object, data, ...)
+\method{Predict.matrix}{nested}(object, data, get.xa = FALSE)
+}
+\arguments{
+\item{object}{smooth object of class "nest" (see \link{smooth.construct.nest.smooth.spec}).}
+
+\item{data}{data frame / list holding the terms.}
+
+\item{get.xa}{if TRUE, return the inner indices \code{xa} (n x number of margins) and, for each margin with
+inner parameters, the derivatives of its index w.r.t. them (\code{xa_da}), instead of the model matrix.}
 }
 \description{
 Predict using nested effects

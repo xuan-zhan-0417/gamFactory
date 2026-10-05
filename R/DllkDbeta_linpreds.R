@@ -39,12 +39,7 @@ DllkDbeta.linpreds <- function(o, llk, deriv = 1, param = NULL){
     H <- vector(mode = "list", length = nc^2)
     for( ir in 1:nc ){
       for( ic in ir:nc ){
-        cl1 <- class(o$eff[[ic]])[1]
-        cl2 <- class(o$eff[[ir]])[1]
-        keep <- c("si", "stand", "inter_dlinear", "inter_le", "inter_ee")
-        if(!(cl1 %in% keep)){ cl1 <- "nexpsm" }
-        if(!(cl2 %in% keep)){ cl2 <- "nexpsm" }
-        Hess <- paste0(".Hess.", cl1, "_", cl2)
+        Hess <- paste0(".Hess.", class(o$eff[[ic]])[1], "_", class(o$eff[[ir]])[1])   # see R/I_Hess.R
         H[[ic+(ir-1)*nc]] <- if(ir != ic){ 
           do.call(Hess, list("o1" = o$eff[[ic]], "o2" = o$eff[[ir]], 
                              "llk" = subset_llk(i1 = iel[[ic]], i2 = iel[[ir]], deriv = 2)))
