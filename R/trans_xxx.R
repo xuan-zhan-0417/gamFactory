@@ -131,7 +131,7 @@ trans_linear_nexpsm <- function(
 #' @param margin1,margin2 Transformation of margin 1 / margin 2 of an interactive transformation: the output of
 #'                        \code{trans_linear} (single index), \code{trans_exp} (adaptive exponential smooth),
 #'                        \code{trans_mgks} (kernel smooth) or \code{trans_plain} (ordinary covariate), whose
-#'                        \code{type} selects the margin's bundle (\link{nest_bundles}). \code{NULL} (default):
+#'                        \code{type} selects the margin's bundle (\link{trans_bundles}). \code{NULL} (default):
 #'                        inferred from the shape / column names of the term. Supported combinations are listed in
 #'                        \link{smooth.construct.nest.smooth.spec}.
 #' @param alpha_scale Initial value for the scaling parameter of an exponential smooth (which multiplies the

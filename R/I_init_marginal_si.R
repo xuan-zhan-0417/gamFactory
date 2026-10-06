@@ -1,5 +1,5 @@
 
-# used by bundle_si (R/bundle_si.R)
+# used by bundle_trans_si (R/bundle_trans_si.R)
 # build the marginal si for each variable
 # including centering, diagonalization, and initialization of alpha and a0
 

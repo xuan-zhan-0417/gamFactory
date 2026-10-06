@@ -1,9 +1,9 @@
-#' @rdname nest_bundles
-#' @export bundle_mgks
+#' @rdname trans_bundles
+#' @export bundle_trans_mgks
 #'
-bundle_mgks <- function(){
+bundle_trans_mgks <- function(){
   list(
-    bundle_nam = "bundle_mgks",
+    bundle_nam = "bundle_trans_mgks",
     scale = TRUE,
     linear = FALSE,
 

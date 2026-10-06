@@ -1,11 +1,11 @@
 #'
 #' Bundle for Sinh-Arsinh (shash) regression model
 #' 
-#' @name bundle_shash
-#' @rdname bundle_shash
+#' @name bundle_fam_shash
+#' @rdname bundle_fam_shash
 #' @export
 #'
-bundle_shash <- function(){
+bundle_fam_shash <- function(){
   out <- list(np = 4,
               available_deriv = 3,
               llk = gamFactory:::llk_shash,

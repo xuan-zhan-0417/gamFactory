@@ -7,7 +7,7 @@
 wrap_bundle_deriv(bundle, X, trans = NULL, w = NULL)
 }
 \arguments{
-\item{bundle}{a margin bundle, e.g. \code{bundle_exp()}.}
+\item{bundle}{a margin bundle, e.g. \code{bundle_trans_exp()}.}
 
 \item{X}{the term of the margin, as passed to \link{s_nest}.}
 
@@ -20,11 +20,11 @@ A list with the functions \code{d0}, \code{d1}, \code{d2}, \code{d3} of the inne
 to \link{check_deriv}, and \code{param}, the initial inner parameters set by the bundle.
 }
 \description{
-Wraps the \code{eval} function of a margin bundle (\link{nest_bundles}) so that its derivatives can
+Wraps the \code{eval} function of a margin bundle (\link{trans_bundles}) so that its derivatives can
 be compared with finite differences by \link{check_deriv}, as done for a family with the derivatives of
 \link{llk_gaussian}. The function differentiated is \eqn{\sum_i w_i z_i}, where \eqn{z} is the index of
 the margin computed by the bundle at the term \code{X}.
 }
 \examples{
-# see ?nest_bundles
+# see ?trans_bundles
 }

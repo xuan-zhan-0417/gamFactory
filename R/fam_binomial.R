@@ -59,7 +59,7 @@
 #' 
 fam_binomial <- function(n){
   
-  bundle <- bundle_binomial(n)
+  bundle <- bundle_fam_binomial(n)
   
   fam <- build_family(bundle)()
   

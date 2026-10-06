@@ -1,11 +1,11 @@
 #'
 #' Bundle for Gaussian regression model
 #' 
-#' @name bundle_gaussian
-#' @rdname bundle_gaussian
+#' @name bundle_fam_gaussian
+#' @rdname bundle_fam_gaussian
 #' @export
 #'
-bundle_gaussian <- function(){
+bundle_fam_gaussian <- function(){
   out <- list(np = 2,
               available_deriv = 4,
               llk = gamFactory::llk_gaussian,

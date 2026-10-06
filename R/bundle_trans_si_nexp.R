@@ -1,9 +1,9 @@
-#' @rdname nest_bundles
-#' @export bundle_si_nexp
+#' @rdname trans_bundles
+#' @export bundle_trans_si_nexp
 #'
-bundle_si_nexp <- function(){
+bundle_trans_si_nexp <- function(){
   list(
-    bundle_nam = "bundle_si_nexp",
+    bundle_nam = "bundle_trans_si_nexp",
     scale = FALSE,
     linear = FALSE,
 

@@ -36,7 +36,7 @@
 #' 
 fam_gpd <- function(){
   
-  bundle <- bundle_gpd()
+  bundle <- bundle_fam_gpd()
   
   fam <- build_family(bundle)()
   

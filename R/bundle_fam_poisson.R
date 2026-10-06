@@ -1,11 +1,11 @@
 #'
-#' Bundle for Gaussian regression model
+#' Bundle for Poisson regression model
 #' 
-#' @name bundle_poisson
-#' @rdname bundle_poisson
-#' @export bundle_poisson
+#' @name bundle_fam_poisson
+#' @rdname bundle_fam_poisson
+#' @export bundle_fam_poisson
 #'
-bundle_poisson <- function(){
+bundle_fam_poisson <- function(){
   out <- list(np = 1,
               available_deriv = 4,
               llk = gamFactory::llk_poisson,

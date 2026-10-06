@@ -1,11 +1,11 @@
 #'
-#' Bundle for Gaussian regression model
+#' Bundle for binomial regression model
 #' 
-#' @name bundle_binomial
-#' @rdname bundle_binomial
+#' @name bundle_fam_binomial
+#' @rdname bundle_fam_binomial
 #' @export
 #'
-bundle_binomial <- function(n){
+bundle_fam_binomial <- function(n){
   force(n)
   # We want to fix n (the "size" of the binomial) at this stage
   .llk_wrap <- function(...){

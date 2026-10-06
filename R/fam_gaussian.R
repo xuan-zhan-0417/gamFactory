@@ -30,7 +30,7 @@
 #' }
 fam_gaussian <- function(){
   
-  bundle <- bundle_gaussian()
+  bundle <- bundle_fam_gaussian()
   
   fam <- build_family(bundle)()
   

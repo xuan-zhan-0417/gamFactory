@@ -15,7 +15,7 @@ and centring constant \code{xm}), which is all the downstream code reads.
 \description{
 One constructor for all nested effects built by \link{s_nest}: \eqn{s(m_1)} with one term
 and \eqn{s(m_1, m_2)} (ANOVA tensor product) with two terms. Each margin \eqn{m_k} is an inner
-transformation of its term, described by a bundle (\link{nest_bundles}):
+transformation of its term, described by a bundle (\link{trans_bundles}):
 \itemize{
 \item{\code{"si"}}{ single index \eqn{X\alpha}, set by \link{trans_linear}. The term is a numeric matrix.}
 \item{\code{"exp"}}{ adaptive exponential smooth, set by \link{trans_nexpsm} (or \code{trans_exp}). The term is a

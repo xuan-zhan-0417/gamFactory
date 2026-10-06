@@ -1,4 +1,4 @@
-# Helpers shared by the margin bundles (R/bundle_*.R) and by the generic code of nested effects.
+# Helpers shared by the margin bundles (R/bundle_trans_*.R) and by the generic code of nested effects.
 #   .nest_bundle        the bundle of a margin, rebuilt from its stored name (as a family from bundle_nam)
 #   .nest_eval_centred  z = g - xm and its derivatives, g being the output of expsmooth() / mgks() / ...
 #   .nest_eval_scaled   z = exp(scale) (g - xm) and its derivatives

@@ -56,7 +56,7 @@
 #' 
 fam_poisson <- function(){
   
-  bundle <- bundle_poisson()
+  bundle <- bundle_fam_poisson()
   
   fam <- build_family(bundle)()
   

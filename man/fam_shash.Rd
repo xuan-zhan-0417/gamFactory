@@ -31,7 +31,7 @@ dataf <- data.frame(cbind(dat, x))
 names(dataf) <- c("y", "x")
 plot(x, dat, xlab = "x", ylab = "y")
 
-my_fam <- build_family(bundle_shash())
+my_fam <- build_family(bundle_fam_shash())
 
 ## Fit model
 fit <- gam(list(y ~ s(x), # <- model for location 

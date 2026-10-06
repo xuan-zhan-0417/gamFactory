@@ -4,7 +4,7 @@
 #' @rdname smooth.construct.nest.smooth.spec
 #' @description One constructor for all nested effects built by \link{s_nest}: \eqn{s(m_1)} with one term
 #'              and \eqn{s(m_1, m_2)} (ANOVA tensor product) with two terms. Each margin \eqn{m_k} is an inner
-#'              transformation of its term, described by a bundle (\link{nest_bundles}):
+#'              transformation of its term, described by a bundle (\link{trans_bundles}):
 #' \itemize{
 #'   \item{\code{"si"}}{ single index \eqn{X\alpha}, set by \link{trans_linear}. The term is a numeric matrix.}
 #'   \item{\code{"exp"}}{ adaptive exponential smooth, set by \link{trans_nexpsm} (or \code{trans_exp}). The term is a
@@ -33,13 +33,13 @@ smooth.construct.nest.smooth.spec <- function(object, data, knots){
   term  <- object$term
   trans <- object$xt$si$trans
 
-  # one bundle per margin, chosen by the type of the margin
+  # one bundle per margin, bundle_trans_<type>, chosen by the type of the margin
   mt <- .nest_margin_types(trans, data, term)
   struct <- paste(mt, collapse = "|")
   if( !(struct %in% .nest_structures) ){
     stop("Unsupported structure: ", struct, ". Supported: ", paste(.nest_structures, collapse = ", "), ".")
   }
-  b <- lapply(mt, function(type) .nest_bundle(paste0("bundle_", type)))
+  b <- lapply(mt, function(type) .nest_bundle(paste0("bundle_trans_", type)))
 
   # initialise each margin: its inner parameters, and its index z on which the outer basis is built
   m <- lapply(seq_along(term), function(k) b[[k]]$init(data[[ term[k] ]], trans[[k]], term[k]))

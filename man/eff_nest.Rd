@@ -20,5 +20,5 @@ Build a nested effect
 \details{
 The parameter vector is \code{c(alpha, beta)}: \code{alpha} stacks the inner parameters of
 the margins, \code{beta} the outer spline coefficients. The index \code{z_k} of each margin and its
-derivatives are computed by the \code{eval} function of its bundle (\link{nest_bundles}).
+derivatives are computed by the \code{eval} function of its bundle (\link{trans_bundles}).
 }

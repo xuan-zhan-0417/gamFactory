@@ -3,9 +3,10 @@
 #'
 #' @description Every nested effect (\link{smooth.construct.nest.smooth.spec}) is made of one or two margins, and
 #'              each type of margin is described by a bundle, in the same way as a family is described by e.g.
-#'              \link{bundle_gaussian}. The generic code (constructor, \code{eff_nest}, predict, postproc) only
+#'              \link{bundle_fam_gaussian}. The generic code (constructor, \code{eff_nest}, predict, postproc) only
 #'              calls the bundle; the smooth object stores its name (\code{si$margin[[k]]$bundle_nam}), never its
-#'              functions.
+#'              functions. Bundles of inner transformations are named \code{bundle_trans_<type>}, bundles of families
+#'              \code{bundle_fam_<family>}.
 #' @return A list with elements
 #' \itemize{
 #'   \item{\code{bundle_nam}}{ name of the bundle function.}
@@ -22,9 +23,9 @@
 #'         Also returns the centring constant \code{xm}.}
 #'   \item{\code{newdata(mk, X)}}{ margin \code{mk} with its data replaced by the new term \code{X}.}
 #' }
-#' @details \code{bundle_si}: single index \eqn{z = X (\alpha + a_0)}, X centred and rotated.
-#'          \code{bundle_exp}: adaptive exponential smooth. \code{bundle_mgks}: kernel smooth.
-#'          \code{bundle_si_nexp}: exponential smooth of a single index. \code{bundle_plain}: ordinary covariate,
+#' @details \code{bundle_trans_si}: single index \eqn{z = X (\alpha + a_0)}, X centred and rotated.
+#'          \code{bundle_trans_exp}: adaptive exponential smooth. \code{bundle_trans_mgks}: kernel smooth.
+#'          \code{bundle_trans_si_nexp}: exponential smooth of a single index. \code{bundle_trans_plain}: ordinary covariate,
 #'          no inner parameters. The derivatives returned by \code{eval} can be checked with \link{check_deriv},
 #'          see \link{wrap_bundle_deriv}.
 #' @examples
@@ -35,22 +36,22 @@
 #' # exponential smooth margin: compare exact and finite-difference derivatives up to order 3
 #' E <- cbind(rnorm(n), 1, runif(n))
 #' colnames(E) <- c("y", "x", "x")
-#' obj <- wrap_bundle_deriv(bundle_exp(), E)
+#' obj <- wrap_bundle_deriv(bundle_trans_exp(), E)
 #' der <- check_deriv(obj = obj, param = obj$param + 0.1, ord = 1:3)
 #' sapply(der, function(d) max(abs(d[ , 1] - d[ , 2])))   # column 1: exact, column 2: finite differences
 #'
 #' # single index margin with a penalty
 #' X <- matrix(rnorm(n * 3), n, 3)
-#' obj <- wrap_bundle_deriv(bundle_si(), X, trans = trans_linear(pord = 1))
+#' obj <- wrap_bundle_deriv(bundle_trans_si(), X, trans = trans_linear(pord = 1))
 #' der <- check_deriv(obj = obj, param = obj$param + 0.1, ord = 1:3)
 #' sapply(der, function(d) max(abs(d[ , 1] - d[ , 2])))   # column 1: exact, column 2: finite differences
-#' @name nest_bundles
-#' @rdname nest_bundles
-#' @export bundle_si
+#' @name trans_bundles
+#' @rdname trans_bundles
+#' @export bundle_trans_si
 #'
-bundle_si <- function(){
+bundle_trans_si <- function(){
   list(
-    bundle_nam = "bundle_si",
+    bundle_nam = "bundle_trans_si",
     scale = FALSE,
     linear = TRUE,
 

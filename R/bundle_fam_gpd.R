@@ -2,10 +2,10 @@
 #' Ingredients for Generalized Pareto family
 #' 
 #' @description XXX.
-#' @name bundle_gpd
-#' @rdname bundle_gpd
-#' @export bundle_gpd
-bundle_gpd <- function(){
+#' @name bundle_fam_gpd
+#' @rdname bundle_fam_gpd
+#' @export bundle_fam_gpd
+bundle_fam_gpd <- function(){
   out <- list(np = 2,
               available_deriv = 3,
               llk = gamFactory::llk_gpd,

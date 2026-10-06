@@ -13,7 +13,7 @@ build_family(bundle)
 XXX.
 }
 \examples{
-fam <- build_family(bundle_gaussian())
+fam <- build_family(bundle_fam_gaussian())
 library(MASS)
 b <- gam(list(accel~s(times,k=20,bs="ad"),~s(times)),
          data=mcycle,family=fam)

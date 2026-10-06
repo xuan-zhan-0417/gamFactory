@@ -1,4 +1,4 @@
-# Sibling of R/I_init_marginal_si.R: initialisation of one exp margin (used by bundle_exp, R/bundle_exp.R).
+# Sibling of R/I_init_marginal_si.R: initialisation of one exp margin (used by bundle_trans_exp, R/bundle_trans_exp.R).
 
 # ---------------------------------------------------------------------------
 # One adaptive exponential smooth margin: same "y" / "x" / "times" conventions and nrep
