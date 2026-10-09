@@ -1,13 +1,18 @@
 #'
-#' Ingredients for Generalized Pareto family
-#' 
-#' @description XXX.
+#' Bundle for the Generalized Pareto Distribution (GPD) model
+#'
+#' @description Self-contained implementation (\code{mgcv} has no built-in GPD family).
+#'              The two linear predictors correspond, in order, to \code{phi}, a
+#'              reparametrisation of the scale (\code{sigma = phi / (1 + xi)}, chosen so
+#'              that the parameters are close to orthogonal), and the shape \code{xi}.
+#'              The default link for \code{xi} is \code{"logitab(0.001, 0.5)"}, bounding
+#'              the shape in \code{(0.001, 0.5)} (positive, finite-variance tail).
 #' @name bundle_fam_gpd
 #' @rdname bundle_fam_gpd
 #' @export bundle_fam_gpd
 bundle_fam_gpd <- function(){
   out <- list(np = 2,
-              available_deriv = 3,
+              available_deriv = 4,
               llk = gamFactory::llk_gpd,
               links = list(c("log", "sqrt"), "logitab(0.001, 0.5)"), 
               nam = "gpd", 
@@ -51,7 +56,7 @@ bundle_fam_gpd <- function(){
                 
                 return( r )
               }, 
-              initialize = function(y, nobs, E, x, family, offset, jj, unscaled){
+              initialize = function(y, nobs, E, x, family, offset, jj, unscaled, weights){
                 ## start out with xi close to zero. If xi==0 then
                 ## mean is sigma = phi. Idea is to regress g(y) on model matrix for mean.
                 ## Note that appropriate E scaling

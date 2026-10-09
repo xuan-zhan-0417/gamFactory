@@ -1,12 +1,13 @@
 # Construct outer B-spline basis for nested smooth effects
 # 
-.build_nested_bspline_basis <- function(object, data, knots, si){
+.build_nested_bspline_basis <- function(object, data, knots, si, kex){
   
   dsmo <- object$bs.dim    # Number of outer basis functions before imposing constraints (see below)
+  di <- length( si$alpha ) # Number of transformation coefficients
+  
   term <- object$term
   x <- data[[term]]
   knots_x <- knots[[term]] 
-  di <- length( si$alpha ) # Number of transformation coefficients
   
   if( abs(mean(x)) > 1e-6 ){
     stop("The data should be centered!")
@@ -19,21 +20,15 @@
   }
   
   # Determine the knots of the outer B-spline basis
+  # We place the knots between kex[1] and kex[2]
   if( is.null(knots_x) ){
     ko <- dsmo + m[1] + 2      # Total number of knots B-spline knots
     kin <- ko - 2 * (m[1] + 1) # Number of inner knots
-    # Dynamically setting the kex range, and expand 1
-    x_range <- range(x, na.rm = TRUE) + c(-1, 1) 
-    if(x_range[1] < -6 || x_range[2] > 6) {
-      kex <- x_range           
-    } else {
-      kex <- c(-6, 6)         
-    }
-
     dx <- diff(kex) / (kin-1)   
     knots_x <- c(seq(kex[1] - dx*(m[1]+1), kex[1]-dx, dx),  
                               seq(kex[1], kex[2], dx), 
                               seq(kex[2]+dx, kex[2] + dx*(m[1]+1), dx))
+    #knots_x <- qnorm(1:length(knots_x) / (length(knots_x) + 1)) # Transform knots to be on the quantiles of the standard normal distribution
     knots[[object$term]] <- knots_x
   }
   

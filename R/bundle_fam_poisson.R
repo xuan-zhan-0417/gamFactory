@@ -1,6 +1,8 @@
 #'
-#' Bundle for Poisson regression model
-#' 
+#' Bundle for the Poisson regression model
+#'
+#' @description Bundle for a Poisson GAM with a single linear predictor for the rate
+#'              \code{mu}.
 #' @name bundle_fam_poisson
 #' @rdname bundle_fam_poisson
 #' @export bundle_fam_poisson
@@ -21,9 +23,7 @@ bundle_fam_poisson <- function(){
               rd = function(mu, wt, scale) {
                 return( rpois(nrow(mu), mu) )
               },
-              initialize = function(y, nobs, E, x, family, offset, jj, unscaled){
-                
-                n <- rep(1, nobs)
+              initialize = function(y, nobs, E, x, family, offset, jj, unscaled, weights){
                 
                 ## should E be used unscaled or not?..
                 use.unscaled <- if (!is.null(attr(E, "use.unscaled"))){ TRUE } else { FALSE }

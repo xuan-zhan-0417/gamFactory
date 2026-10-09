@@ -1,13 +1,22 @@
 #'
-#' The Sinh-Arsinh (shash) regression model
-#' 
+#' The Sinh-Arsinh (shash) location-scale-skewness-kurtosis family
+#'
+#' @description \code{gam}/\code{gam_nl} should be called with a list of 4 formulae: the
+#'              first specifies the response and the linear predictor for the location
+#'              \code{mu}; the second (one sided) specifies the linear predictor for
+#'              \code{tau = log(sigma)}, the log-scale; the third (one sided) specifies
+#'              the linear predictor for the skewness \code{eps}; the fourth (one sided)
+#'              specifies the linear predictor for \code{phi = log(delta)}, the
+#'              log-kurtosis.
 #' @name fam_shash
 #' @rdname fam_shash
 #' @export fam_shash
-#' @examples 
+#' @examples
 #' ###############
 #' # [1] Example with standard effects 
 #' ###############
+#' library(gamFactory)
+#' 
 #' ##  Simulate some data from shash
 #' set.seed(847)
 #' n <- 1000
@@ -66,7 +75,6 @@
 #'   lines(x, true, type = 'l', col = 2, lwd = 2, lty = 2)
 #' }
 #' legend("topleft", c("estimated", "truth"), col = 1:2, lty = 1:2, lwd = 2)
-#' library(gamFactory)
 #'
 #' ###############
 #' # [2] Example with single index
@@ -107,11 +115,11 @@
 #' check(fit, type = "tnormal")
 #' check0D(fit, type = "tnormal")
 #' 
-fam_shash <- function(){
+fam_shash <- function(link = NULL){
   
   bundle <- bundle_fam_shash()
   
-  fam <- build_family(bundle)()
+  fam <- build_family(bundle, link = link)()
   
   return(fam)
   

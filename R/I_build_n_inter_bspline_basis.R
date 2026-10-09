@@ -1,4 +1,4 @@
-.build_n_inter_bspline_basis <- function(object, data, knots, si, nested) {
+.build_n_inter_bspline_basis <- function(object, data, knots, si, nested, kex) {
   
   # k <- object$bs.dim
   # if (is.null(k) || all(k < 0) || all(is.na(k))) {
@@ -29,8 +29,8 @@
   obj2$p.order <- m
   
   # si = null to avoid pad 0 in the left of X
-  out1 <- .build_nested_bspline_basis(obj1, data, knots, si = NULL)
-  out2 <- .build_nested_bspline_basis(obj2, data, knots, si = NULL) 
+  out1 <- .build_nested_bspline_basis(obj1, data, knots, si = NULL, kex = kex[[1]])
+  out2 <- .build_nested_bspline_basis(obj2, data, knots, si = NULL, kex = kex[[2]]) 
   
   X1 <- out1$X; X2 <- out2$X
 

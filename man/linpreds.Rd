@@ -7,7 +7,7 @@
 linpreds(eff, iel, iec)
 }
 \arguments{
-\item{eff}{list of effects, see e.g. \link{eff_stand} or \link{eff_si}.}
+\item{eff}{list of effects, see e.g. \link{eff_stand} or \link{eff_nest}.}
 
 \item{iel}{vectors indicating to which linear predictor each effect belongs to.}
 

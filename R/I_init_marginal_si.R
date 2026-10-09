@@ -1,9 +1,10 @@
 
-# used by bundle_trans_si (R/bundle_trans_si.R)
+# used by bundle_trans_si and bundle_trans_si_pos (R/bundle_trans_si.R, R/bundle_trans_si_pos.R)
 # build the marginal si for each variable
 # including centering, diagonalization, and initialization of alpha and a0
+# positive = TRUE: the weights are exp(alpha + a0), so alpha is on the log scale
 
-.init_marginal_si <- function(Xi, S = NULL, pord = NULL, a0 = NULL, alpha = NULL) {
+.init_marginal_si <- function(Xi, S = NULL, pord = NULL, a0 = NULL, alpha = NULL, positive = FALSE) {
   # (a) Centering
   Xi_centered <- scale(Xi, scale = FALSE)
   xm <- attr(Xi_centered, "scaled:center")
@@ -44,13 +45,16 @@
   alpha <- solve(B, alpha)
   a0    <- solve(B, a0)
   
-  # Impose variance constraint: var(X * (alpha + a0)) = 1
-  ax_unscaled <- X %*% (alpha + a0)
-  scale_factor <- sd(ax_unscaled)
-  
-  alpha <- alpha / scale_factor
-  a0    <- a0 / scale_factor
-  ax    <- drop(ax_unscaled / scale_factor)
+  # Impose variance constraint: var(z) = 1, dividing by n as the penalty on the variance does
+  if (positive) {
+    alpha <- alpha - log(.sd_n(X %*% exp(alpha + a0)))
+    ax    <- drop(X %*% exp(alpha + a0))
+  } else {
+    scale_factor <- .sd_n(X %*% (alpha + a0))
+    alpha <- alpha / scale_factor
+    a0    <- a0 / scale_factor
+    ax    <- drop(X %*% (alpha + a0))
+  }
   
   list(
     xm = xm, X = X, B = B, S = S_out, rank = rank_S,

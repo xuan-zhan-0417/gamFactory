@@ -1,10 +1,14 @@
 #'
-#' The gaussian family
-#' 
+#' The Gaussian location-scale family
+#'
+#' @description \code{gam}/\code{gam_nl} should be called with a list of 2 formulae: the
+#'              first specifies the response and the linear predictor for the mean
+#'              \code{mu}; the second (one sided) specifies the linear predictor for
+#'              \code{tau = 1 / sigma}, the reciprocal of the standard deviation.
 #' @name fam_gaussian
 #' @rdname fam_gaussian
 #' @export fam_gaussian
-#' @examples 
+#' @examples
 #' library(gamFactory)
 #' 
 #'  
@@ -28,11 +32,11 @@
 #' if(err > 1e-6){
 #'   stop("Discrepancy between gam and gam_nl")
 #' }
-fam_gaussian <- function(){
+fam_gaussian <- function(link = NULL){
   
   bundle <- bundle_fam_gaussian()
   
-  fam <- build_family(bundle)()
+  fam <- build_family(bundle, link = link)()
   
   return(fam)
   

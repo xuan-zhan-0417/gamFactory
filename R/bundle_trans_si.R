@@ -69,7 +69,7 @@ bundle_trans_si <- function(){
       }
       res <- .init_marginal_si(Xi = X, S = trans$S, pord = trans$pord, a0 = trans$a0, alpha = trans$alpha)
       pen <- if( res$rank > 0 ) list(list(S = res$S, rank = res$rank, offset = 0))
-      list(z = res$ax, alpha = res$alpha, pen = pen,
+      list(z = res$ax, alpha = res$alpha, pen = pen, kex = .kex_si(res$X),
            margin = list(X = res$X, B = res$B, xm = res$xm, a0 = res$a0))
     },
 
@@ -88,4 +88,12 @@ bundle_trans_si <- function(){
       mk
     }
   )
+}
+
+# Range of the outer knots of a single index: a direction alpha with var(X alpha) = 1 gives at most
+# max_i sqrt(x_i' (X'X / n)^-1 x_i), the largest Mahalanobis distance of the (centred) covariates
+.kex_si <- function(X){
+  Sigma_inv <- MASS::ginv( crossprod(X) / nrow(X) )
+  Xb_max <- 1.1 * sqrt(max(rowSums((X %*% Sigma_inv) * X)))
+  c(-Xb_max, Xb_max)
 }

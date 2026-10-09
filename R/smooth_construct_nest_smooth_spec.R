@@ -7,6 +7,8 @@
 #'              transformation of its term, described by a bundle (\link{trans_bundles}):
 #' \itemize{
 #'   \item{\code{"si"}}{ single index \eqn{X\alpha}, set by \link{trans_linear}. The term is a numeric matrix.}
+#'   \item{\code{"si_pos"}}{ single index with positive weights \eqn{X \exp(\alpha)}, set by
+#'         \code{trans_linear(positive_si = TRUE)}. One margin only.}
 #'   \item{\code{"exp"}}{ adaptive exponential smooth, set by \link{trans_nexpsm} (or \code{trans_exp}). The term is a
 #'         matrix with columns named \code{"y"} (data to smooth), \code{"x"} (smoothing-rate covariates) and,
 #'         optionally, \code{"times"}.}
@@ -15,7 +17,7 @@
 #'   \item{\code{"si_nexp"}}{ exponential smooth of a single index, set by \link{trans_linear_nexpsm}.}
 #'   \item{\code{"plain"}}{ ordinary covariate (second margin only), set by \link{trans_plain}. The term is a vector.}
 #' }
-#' Supported structures: one margin of type si, exp, mgks or si_nexp; two margins si|plain, si|si, si|exp,
+#' Supported structures: one margin of type si, si_pos, exp, mgks or si_nexp; two margins si|plain, si|si, si|exp,
 #' exp|plain, exp|exp, mgks|plain (\code{trans = trans_inter(margin1, margin2)}). A margin of
 #' \code{trans_inter} without a trans object is inferred from its term.
 #' @return A smooth of class \code{c("nest", "nested")}. \code{xt$si} holds \code{alpha} (the inner parameters,
@@ -46,13 +48,15 @@ smooth.construct.nest.smooth.spec <- function(object, data, knots){
   for(k in seq_along(term)){ data[[ term[k] ]] <- m[[k]]$z }
   si <- .nest_assemble_si(m, b)
 
-  # outer basis: B-splines of z1, or ANOVA tensor product of B-splines of z1 and z2
+  # outer basis: B-splines of z1, or ANOVA tensor product of B-splines of z1 and z2; the knots of each margin
+  # span the range kex given by its bundle
   if( length(term) == 1 ){
-    out <- .build_nested_bspline_basis(object = object, data = data, knots = knots, si = si)
+    out <- .build_nested_bspline_basis(object = object, data = data, knots = knots, si = si, kex = m[[1]]$kex)
     out$xt$basis <- .wrap_1d_nested_basis(out$xt$basis)
   } else {
     out <- .build_n_inter_bspline_basis(object = object, data = data, knots = knots, si = si,
-                                         nested = sapply(m, function(mk) length(mk$alpha) > 0))
+                                         nested = sapply(m, function(mk) length(mk$alpha) > 0),
+                                         kex = lapply(m, "[[", "kex"))
   }
 
   # penalties on the inner parameters, padded into the full coefficient space

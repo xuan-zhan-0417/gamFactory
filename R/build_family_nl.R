@@ -1,12 +1,20 @@
+#'
 #' Function for building GAM families containing non-standard effects
-#' 
+#'
+#' @param bundle A family bundle, as returned by a \code{fam_*} constructor's \code{bundle_nam} function.
+#' @param info Effect/penalty information for the model, as returned by \code{\link{prep_info}}.
+#' @param link Link function(s) to use. If \code{NULL}, the bundle's default link(s) are used.
+#' @param lamVar Multiplier applied to the effect-specific penalties (see [s_nest]).
+#' @param lamRidge Multiplier applied to the ridge penalties used to stabilise nested effects.
+#' @param si_init settings controlling the multi-start search used to initialise single-index
+#'                (\code{trans_linear}) nested effects, as produced by \code{\link{si_init_control}}.
+#'                Ignored if the model has no such effects.
 #' @name build_family_nl
 #' @rdname build_family_nl
 #' @export build_family_nl
-#' 
-#' 
-
-build_family_nl <- function(bundle, info, lamVar = 1e5, lamRidge = 1e-2){
+#'
+build_family_nl <- function(bundle, info, link, lamVar = 1e5, lamRidge = 1e-5,
+                             si_init = si_init_control()){
   
   available_deriv <- min(bundle$available_deriv, 3)
   cdf <- bundle$cdf
@@ -26,52 +34,43 @@ build_family_nl <- function(bundle, info, lamVar = 1e5, lamRidge = 1e-2){
   if( is.null(check_extra) ){ check_extra <- function(.ex) NULL }
   
   initialize_bundle <- bundle$initialize
-  
-  initialize_internal <- function(y, nobs, E, x, family, offset){
+  predict <- bundle$predict
+
+  initialize_internal <- function(y, nobs, E, x, family, offset, weights){
+
+    # When initialize_internal is called from within mgcv:::initial.spg() we set n_init to 1. 
+    # That's because gam_nl chooses the smoothing parameters via .my_initial_spg, but 
+    # mgcv:::estimate.gam calls mgcv:::initial.spg() anyway. The latter calls family$initialize, 
+    # hence initialize_internal will also be called, but its output will not be used at all!
+    called_by_initial_spg <- tryCatch({
+      calls <- sys.calls()
+      any(vapply(calls, function(cl) {
+        fn <- cl[[1]]
+        is.symbol(fn) && identical(as.character(fn), "initial.spg")
+      }, logical(1)))
+    }, error = function(e) FALSE)
     
-    p <- ncol( x )
-    unscaled <- attr(E,"use.unscaled")
-    lpi <- attr(x, "lpi")
-    
-    si <- which( sapply(info$type, paste0, collapse = '') != "stand" )
-    nsi <- length( si )
-    
-    nkk <- 1:ncol(x)
-    start <- numeric( ncol(x) )
-    if( nsi ){ # If there are nested effects we: 
-      # a) Identify coefficients of inner vector (alpha)
-      iec <- info$iec[si]
-      dsi <- sapply(info$extra[si], function(.x) length(.x$si$alpha))
-      kk <- do.call("c", lapply(1:nsi, function(.ii) iec[[.ii]][1:dsi[.ii]]))
-      # b) set the corresponding elements of start to the values contained in info$extra
-      alpha <- do.call("c", lapply(info$extra[si], function(.x) .x$si$alpha))
-      start[ kk ] <- alpha
-      # c) modify lpi so that family$initialize_bundle will initialize only the remaining coefficients
-      #    (excluding the columns of x and E related to the inner coefficients alpha)
-      lpi <- lapply(lpi, function(.x) .x[ !(.x %in% kk) ])
-      lpi <- lapply(lpi, function(.x) sapply(.x, function(.x1) .x1 - sum(kk < .x1)))
-      E <- E[ , -kk, drop = FALSE]
-      x <- x[ , -kk, drop = FALSE]
-      attr(x, "lpi") <- lpi
-      nkk <- nkk[ -kk ]
+    n_init_use <- if ( called_by_initial_spg ) 1 else si_init$n_init
+
+    .backfit_si_initialize(y = y, nobs = nobs, E = E, x = x, family = family, offset = offset,
+                            weights = weights, info = info, n_init = n_init_use, n_eigen = si_init$n_eigen,
+                            oversample = si_init$oversample, seed = si_init$seed)
+
+  }
+
+  initialize <- expression({
+    if ( is.null(start) ) {
+      start <- family$initialize_internal(y = y, nobs = nobs, E = E, x = x, family = family, offset = offset, weights = weights)
     }
-    
-    start[nkk] <- family$initialize_bundle(y = y, nobs = nobs, E = E, x = x, family = family, offset = offset, 
-                                           jj = lpi, unscaled = unscaled)
-    
-    return( start )
-    
+  })
+  
+  if(is.null(link)){
+    Links <- lapply(oklinks, "[[", 1) # Default link function(s)
+  } else{
+    Links <- link
   }
   
-  initialize <- expression({
-    if ( is.null(start) ) { 
-      start <- family$initialize_internal(y = y, nobs = nobs, E = E, x = x, family = family, offset = offset) 
-    }
-  }) 
-  
-  defLinks <- lapply(oklinks, "[[", 1) # Default link function(s)
-  
-  outFam <- function(link = defLinks, extra = bundle$extra){
+  outFam <- function(link = Links, extra = bundle$extra){
     
     # Saving extra parameters in .GlobalEnv environment
     assign(".extra", extra, envir = environment())
@@ -243,26 +242,9 @@ build_family_nl <- function(bundle, info, lamVar = 1e5, lamRidge = 1e-2){
 
       return( ret )
       
-    } ## end ll 
-    
-    # predict <- function(family,se=FALSE,eta=NULL,y=NULL,
-    #                     X=NULL,beta=NULL,off=NULL,Vb=NULL) {
-    # 
-    #   effType <- info$type
-    #   ne <- length( effType )
-    #   
-    #   # Build list of effect and penalties
-    #   tmp <- .buildEffects(X = X, coef = beta, info = info, d1b = NULL, deriv = 0, outer = FALSE)
-    #   eff <- tmp$eff
-    # 
-    #   # Build linear predictors and evaluate them
-    #   olp <- linpreds(eff = eff, iel = info$iel, iec = info$iec)
-    #   olp <- olp$eval(param = coef, deriv = derLev)
-    #   
-    #   if (se) return(list(fit=s,se.fit=sef)) else return(list(fit=olp$f))
-    # } ## predict
-    
-    structure(list(family = nam, 
+    } ## end ll
+
+    structure(list(family = nam,
                    bundle_nam = bundle_nam,
                    ll = ll, 
                    link = paste(link), 
@@ -272,10 +254,10 @@ build_family_nl <- function(bundle, info, lamVar = 1e5, lamRidge = 1e-2){
                    initialize = initialize, 
                    initialize_bundle = initialize_bundle, 
                    initialize_internal = initialize_internal,
-                   postproc = postproc, 
+                   postproc = postproc,
                    residuals = residuals,
                    store = store,
-                   #predict = predict,
+                   predict = predict,
                    qf = qf,
                    linfo = stats,
                    rd = rd, 

@@ -1,10 +1,13 @@
 #'
 #' The Poisson family
-#' 
+#'
+#' @description \code{gam}/\code{gam_nl} should be called with a single formula, or a
+#'              list containing a single formula, specifying the response and the linear
+#'              predictor for the rate \code{mu}.
 #' @name fam_poisson
 #' @rdname fam_poisson
 #' @export fam_poisson
-#' @examples 
+#' @examples
 #' library(gamFactory)
 #' 
 #' #### [1] Example with standard effects
@@ -54,11 +57,11 @@
 #' check(fit)
 #' check0D(fit, type = "deviance")
 #' 
-fam_poisson <- function(){
+fam_poisson <- function(link = NULL){
   
   bundle <- bundle_fam_poisson()
   
-  fam <- build_family(bundle)()
+  fam <- build_family(bundle, link = link)()
   
   return(fam)
   

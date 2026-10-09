@@ -2,10 +2,11 @@
 % Please edit documentation in R/bundle_fam_poisson.R
 \name{bundle_fam_poisson}
 \alias{bundle_fam_poisson}
-\title{Bundle for Poisson regression model}
+\title{Bundle for the Poisson regression model}
 \usage{
 bundle_fam_poisson()
 }
 \description{
-Bundle for Poisson regression model
+Bundle for a Poisson GAM with a single linear predictor for the rate
+\code{mu}.
 }

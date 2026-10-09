@@ -1,10 +1,14 @@
 #'
-#' The GPD family
-#' 
+#' The Generalized Pareto Distribution (GPD) family
+#'
+#' @description \code{gam}/\code{gam_nl} should be called with a list of 2 formulae: the
+#'              first specifies the response and the linear predictor for \code{phi}, a
+#'              reparametrisation of the scale (\code{sigma = phi / (1 + xi)}); the
+#'              second (one sided) specifies the linear predictor for the shape \code{xi}.
 #' @name fam_gpd
 #' @rdname fam_gpd
 #' @export fam_gpd
-#' @examples 
+#' @examples
 #' library(gamFactory)
 #' 
 #' n <- 2000
@@ -34,11 +38,11 @@
 #'   stop("Discrepancy between gam and gam_nl")
 #' }
 #' 
-fam_gpd <- function(){
+fam_gpd <- function(link = NULL){
   
   bundle <- bundle_fam_gpd()
   
-  fam <- build_family(bundle)()
+  fam <- build_family(bundle, link = link)()
   
   return(fam)
   

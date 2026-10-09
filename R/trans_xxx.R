@@ -19,6 +19,7 @@
 #'              by the optimiser.
 #' @param alpha_si Initial values used in trans_linear_nexpsm. For linear transformation parameters.
 #' @param alpha_nexp Initial values used in trans_linear_nexpsm. For expsmooth parameters.
+#' @param positive_si Logical indicating whether the elements of alpha should be constrained to be positive.
 #' @param y0 Vector of \eqn{n} observations corresponding to the rows of the variables in \code{s_nest}.
 #' @param n_si Length of \code{alpha_si} if \code{alpha_si} is not provided.
 #' @param n_nexp Length of \code{alpha_nexp} if \code{alpha_nexp} is not provided.
@@ -34,10 +35,9 @@
 #' }
 #' @export trans_linear
 #'
-trans_linear <- function(pord, S, alpha, a0){
-  
+trans_linear <- function(pord, S, alpha, a0, positive_si=FALSE){
   out <- lapply(as.list(match.call())[-1], eval, envir = parent.frame())
-  out$type <- "si"
+  out$type <- if( isTRUE(out$positive_si) ) "si_pos" else "si"      # positive weights: bundle_trans_si_pos
   
   return(out)
   

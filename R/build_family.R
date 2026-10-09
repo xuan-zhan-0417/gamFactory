@@ -14,7 +14,7 @@
 #' summary(b) 
 #' plot(b,pages=1,scale=0)
 #'
-build_family <- function(bundle){
+build_family <- function(bundle, link = NULL){
   
   available_deriv <- bundle$available_deriv
   cdf <- bundle$cdf
@@ -27,6 +27,7 @@ build_family <- function(bundle){
   postproc <- bundle$postproc
   oklinks <- bundle$links
   store <- bundle$store
+  predict <- bundle$predict
   
   llkFam <- bundle$llk
   
@@ -36,14 +37,18 @@ build_family <- function(bundle){
   initialize_internal <- bundle$initialize
   
   initialize <- expression({
-    if ( is.null(start) ) { 
-      start <- family$initialize_internal(y = y, nobs = nobs, E = E, x = x, family = family, offset = offset) 
+    if ( is.null(start) ) {
+      start <- family$initialize_internal(y = y, nobs = nobs, E = E, x = x, family = family, offset = offset, weights = weights)
     }
-  }) 
+  })
   
-  defLinks <- lapply(oklinks, "[[", 1) # Default link function(s)
+  if(is.null(link)){
+   Links <- lapply(oklinks, "[[", 1) # Default link function(s)
+  } else{
+   Links <- link
+  }
   
-  outFam <- function(link = defLinks, extra = bundle$extra){
+  outFam <- function(link = Links, extra = bundle$extra){
     
     # Saving extra parameters in .GlobalEnv environment
     assign(".extra", extra, envir = environment())
@@ -114,11 +119,12 @@ build_family <- function(bundle){
                    linkinv = if(np == 1){ stats[[1]]$linkinv } else { NULL },
                    nlp = np,
                    tri = trind.generator( np ), ## symmetric indices for accessing derivative arrays
-                   initialize = initialize, 
+                   initialize = initialize,
                    initialize_internal = initialize_internal,
-                   postproc = postproc, 
+                   postproc = postproc,
                    residuals = residuals,
                    store = store,
+                   predict = predict,
                    qf = qf,
                    linfo = stats,
                    rd = rd, 

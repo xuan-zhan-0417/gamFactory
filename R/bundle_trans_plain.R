@@ -12,7 +12,7 @@ bundle_trans_plain <- function(){
         stop(label, " must be a single numeric vector when it is a plain (non-nested) margin.")
       }
       tm <- mean(X)
-      list(z = X - tm, alpha = numeric(0), margin = list(x = X - tm, xm = tm))
+      list(z = X - tm, alpha = numeric(0), kex = .nest_kex_default(X - tm), margin = list(x = X - tm, xm = tm))
     },
 
     eval = function(mk, par, deriv = 0, xm = NULL){

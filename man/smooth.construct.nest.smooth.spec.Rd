@@ -18,6 +18,8 @@ and \eqn{s(m_1, m_2)} (ANOVA tensor product) with two terms. Each margin \eqn{m_
 transformation of its term, described by a bundle (\link{trans_bundles}):
 \itemize{
 \item{\code{"si"}}{ single index \eqn{X\alpha}, set by \link{trans_linear}. The term is a numeric matrix.}
+\item{\code{"si_pos"}}{ single index with positive weights \eqn{X \exp(\alpha)}, set by
+\code{trans_linear(positive_si = TRUE)}. One margin only.}
 \item{\code{"exp"}}{ adaptive exponential smooth, set by \link{trans_nexpsm} (or \code{trans_exp}). The term is a
 matrix with columns named \code{"y"} (data to smooth), \code{"x"} (smoothing-rate covariates) and,
 optionally, \code{"times"}.}
@@ -26,7 +28,7 @@ named \code{"y"} and \code{"d1"}, \code{"d2"}, ... (distances).}
 \item{\code{"si_nexp"}}{ exponential smooth of a single index, set by \link{trans_linear_nexpsm}.}
 \item{\code{"plain"}}{ ordinary covariate (second margin only), set by \link{trans_plain}. The term is a vector.}
 }
-Supported structures: one margin of type si, exp, mgks or si_nexp; two margins si|plain, si|si, si|exp,
+Supported structures: one margin of type si, si_pos, exp, mgks or si_nexp; two margins si|plain, si|si, si|exp,
 exp|plain, exp|exp, mgks|plain (\code{trans = trans_inter(margin1, margin2)}). A margin of
 \code{trans_inter} without a trans object is inferred from its term.
 }

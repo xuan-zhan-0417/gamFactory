@@ -12,9 +12,12 @@
 #'                Sinh-Arsinh ([fam_shash]).
 #' @param data A data frame or list that includes the model's response variable along with the covariates specified in the formula.
 #'             For the structure required by the [s_nest] effects, refer to [trans_linear], [trans_mgks], or [trans_nexpsm]
-#' @param fit Same argument as in [mgcv::gam]. If this argument is \code{TRUE} then \code{gam_nl} sets up the 
-#'            model and fits it, but if it is \code{FALSE} then the model is set up and an object containing what would be 
-#'            required to fit is returned.           
+#' @param fit Same argument as in [mgcv::gam]. If this argument is \code{TRUE} then \code{gam_nl} sets up the
+#'            model and fits it, but if it is \code{FALSE} then the model is set up and an object containing what would be
+#'            required to fit is returned.
+#' @param si_init settings controlling the multi-start search used to initialise single-index
+#'                (\code{trans_linear}) nested effects, as produced by \code{\link{si_init_control}}.
+#'                See \code{\link{build_family_nl}}.
 #' @param ... further arguments to be passed to [mgcv::gam].
 #' @name gam_nl
 #' @rdname gam_nl
@@ -38,38 +41,95 @@
 #' dat$X <- X # single-index predictors
 #' 
 #' # Fit the model
-#' fit <- gam_nl(list(y~s_nest(X, trans = trans_linear()) + s(x1), ~1), 
-#'               data = dat, family = fam_gaussian(), control=list(trace=TRUE))
+#' fit <- gam_nl(list(y~s_nest(X, trans = trans_linear()) + s(x1), ~1),
+#'               data = dat, family = fam_gaussian())
 #' 
-#' # Plot the fit
+#' # Plot the smooth and single index vector
 #' fit <- getViz(fit)
 #' print(plot(fit), pages = 1) # plot smooth effects
 #' print(plot(fit, inner = TRUE), pages = 1) # plot inner components
+#' 
+#' # Plot the fit to data vs the true projected data
+#' Xb <- dat$X %*% b
+#' tmp_dat <- dat
+#' tmp_dat$x1 <- 0
+#' plot(Xb, dat$y)
+#' lines(sort(Xb), predict(fit, newdata = tmp_dat)[order(Xb), 1], col = 2, lwd = 2)
+#' lines(sort(Xb), 2 * sin(sort(Xb)), col = 4, lwd = 2)
+#' 
+#' #####
+#' # Single index example (II)
+#' # Same as before but X elements now follow a normal distribution, hence 
+#' # projected data is more spread out and we need more basis functions.
+#' 
+#' X <- matrix(rnorm(p * n), ncol = p)
+#' x1 <- rnorm(n)
+#' y <- 2 * sin(X %*% b) + x1^2 + rnorm(n)
+#' dat <- data.frame(y = y, x1 = x1)
+#' dat$X <- X # single-index predictors
+#' 
+#' # Fit the model, note k = 20
+#' fit <- gam_nl(list(y ~ s_nest(X, k = 20, trans = trans_linear()) + s(x1), ~1),
+#'               data = dat, family = fam_gaussian())
+#' 
+#' # Plot the fit
+#' fit <- getViz(fit)
+#' print(plot(fit), pages = 1)
+#' print(plot(fit, inner = TRUE), pages = 1)
+#' 
+#' # Plot the fit to data vs the true projected data
+#' Xb <- dat$X %*% b
+#' tmp_dat <- dat
+#' tmp_dat$x1 <- 0
+#' plot(Xb, dat$y)
+#' lines(sort(Xb), predict(fit, newdata = tmp_dat)[order(Xb), 1], col = 2, lwd = 2)
+#' lines(sort(Xb), 2 * sin(sort(Xb)), col = 4, lwd = 2)
 #'
-#'
-gam_nl <- function(formula, family = fam_gaussian(), data = list(), fit = TRUE, sp = NULL, y_true = NULL, ...){
+gam_nl <- function(formula, family = fam_gaussian(), data = list(), fit = TRUE,
+                    si_init = si_init_control(), ...){
   
   if( !is.list(formula) ){
     formula <- list(formula)
   }
   
-  ddd <- match.call(expand.dots = FALSE)$`...`
+  dots <- list(...)
   
-  out <- ddd$G
+  out <- dots$G
+  
+  ## Arguments for the first gam() call:
+  ## remove sp so it is not used when fit = FALSE
+  build_dots <- dots
+  build_dots$sp <- NULL
+  
+  ## Arguments for the second gam() call:
+  ## keep sp, but remove G because we pass G explicitly
+  fit_dots <- dots
+  fit_dots$G <- NULL
+  fit_dots$data <- NULL
+  
   if( is.null(out) ){ # Do not build if G already provided
     form_comp <- .compile_formula(formula)
     
-    out <- gam(formula = form_comp, family = family, data = data, fit = FALSE, ...)
+    out <- do.call("gam", c(list(formula = form_comp, family = quote(family), data = quote(data), fit = FALSE), build_dots))
     
     info <- prep_info(o = out)
     
-    fam <- build_family_nl(bundle = do.call(family$bundle_nam, as.list(family$store)), info = info)
+    fam <- build_family_nl(bundle = do.call(family$bundle_nam, as.list(family$store)), info = info, link = family$link,
+                            si_init = si_init)
     
     out$family <- fam()
   }
   
   if( fit ){
-    out <- gam(G = out, sp = sp, ...)
+
+    if( is.null(fit_dots$in.out) && is.null(dots$sp) ){
+      fit_dots$in.out <- list("sp" = .init.sp.nested(out, fit_dots$start, method = fit_dots$method, nei = fit_dots$nei), "scale" = 1)
+      if(is.null(fit_dots$in.out$sp)){ # No nested effects: let mgcv initialise the smoothing parameters
+        fit_dots$in.out <- NULL
+      }
+    }
+
+    out <- do.call("gam", c(list(G = out), fit_dots))
 
     out <- postproc_gam_nl(o = out, info = info)
     
@@ -77,6 +137,8 @@ gam_nl <- function(formula, family = fam_gaussian(), data = list(), fit = TRUE, 
       out$formula[[ii]] <- formula[[ii]]
     }
   }
+  
+  out$call <- match.call()
   
   class(out) <- c("gamnl", class(out))
   

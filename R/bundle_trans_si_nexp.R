@@ -69,18 +69,19 @@ bundle_trans_si_nexp <- function(){
                          alpha_center = alpha_center, Z0 = trans$Z0, positive_si = positive_si)$d0
 
       # sd(z) = 1 at the start: g is linear in the single index, so rescale alpha_si and alpha_center
-      alpha_si <- if( positive_si ) alpha_si - log(sd(g)) else alpha_si / sd(g)
-      alpha_center <- alpha_center / sd(g)
+      sg <- .sd_n(g)
+      alpha_si <- if( positive_si ) alpha_si - log(sg) else alpha_si / sg
+      alpha_center <- alpha_center / sg
 
       pen <- list()
       if( !no_pen_si ){ pen[[length(pen) + 1]] <- list(S = S_si, rank = rank_si, offset = n_nexp) }
       if( !is.null(S_nexp) ){ pen[[length(pen) + 1]] <- list(S = S_nexp, rank = rank_nexp, offset = 0) }
 
-      list(z = (g - mean(g)) / sd(g), alpha = c(alpha_nexp, alpha_si), pen = pen,
+      list(z = (g - mean(g)) / sg, alpha = c(alpha_nexp, alpha_si), pen = pen, kex = .nest_kex_default((g - mean(g)) / sg),
            margin = list(X_si = X_si, X_nexp = X_nexp, times = ex$times, B_si = B_si, B_nexp = B_nexp,
                          n_si = n_si, n_nexp = n_nexp, center = isTRUE(trans$center), xm_si = xm_si,
                          alpha_center = alpha_center, Z0 = trans$Z0, positive_si = positive_si,
-                         xm = mean(g) / sd(g)))
+                         xm = mean(g) / sg))
     },
 
     eval = function(mk, par, deriv = 0, xm = NULL){

@@ -18,17 +18,17 @@ bundle_trans_mgks <- function(){
         # cold start: bandwidths set to -log(sd(Dist)/10)
         init_beta <- -log(sapply(Dist, sd) / 10)
         g <- mgks(y = y0, dist = Dist, beta = init_beta)$d0
-        alpha <- c(log(1 / sd(g)), init_beta)
+        alpha <- c(log(1 / .sd_n(g)), init_beta)
       } else if( length(alpha) == length(Dist) + 1 ){
         # warm start with the scaling parameter included
         g <- mgks(y = y0, dist = Dist, beta = alpha[-1])$d0
-        alpha[1] <- log(1 / sd(g))
+        alpha[1] <- log(1 / .sd_n(g))
       } else {
         g <- mgks(y = y0, dist = Dist, beta = alpha)$d0
-        alpha <- c(log(1 / sd(g)), alpha)
+        alpha <- c(log(1 / .sd_n(g)), alpha)
       }
 
-      list(z = exp(alpha[1]) * (g - mean(g)), alpha = alpha,
+      list(z = exp(alpha[1]) * (g - mean(g)), alpha = alpha, kex = .kex_mgks(y0, Dist),
            margin = list(y = y0, dist = Dist, xm = mean(g)))
     },
 
@@ -59,4 +59,16 @@ bundle_trans_mgks <- function(){
   }
 
   list(y = X[ , nms == "y", drop = FALSE], dist = dist)
+}
+
+# Range of the outer knots of a kernel smooth: the range of the standardised smooth over a grid of bandwidths,
+# beta = -log(m * sd(dist)) with m between 1e-4 and 4 for each distance
+.kex_mgks <- function(y, dist){
+  m <- do.call("expand.grid", lapply(dist, function(D) seq(1e-4, 4, length.out = 5)))
+  beta <- -log(t(t(m) * sapply(dist, sd)))
+  z_range <- function(b){
+    g <- mgks(y = y, dist = dist, beta = b)$d0
+    range((g - mean(g)) / .sd_n(g))
+  }
+  1.1 * range(apply(beta, 1, z_range))
 }

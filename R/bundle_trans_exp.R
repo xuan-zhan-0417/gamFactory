@@ -11,7 +11,7 @@ bundle_trans_exp <- function(){
       res <- .init_marginal_nexp(X, S = trans$S, pord = trans$pord, alpha = trans$alpha,
                                  alpha_scale = trans$alpha_scale, label = label)
       pen <- if( !is.null(res$S) ) list(list(S = res$S, rank = res$rank, offset = 1))   # the scale is not penalised
-      list(z = res$z, alpha = c(res$alpha_scale, res$alpha_w), pen = pen,
+      list(z = res$z, alpha = c(res$alpha_scale, res$alpha_w), pen = pen, kex = .kex_exp(res$y_raw, nrow(res$W), res$times),
            margin = list(y = res$y_raw, W = res$W, times = res$times, B = res$B, xm = res$xm))
     },
 
@@ -50,4 +50,18 @@ bundle_trans_exp <- function(){
   }
 
   list(y = y, W = W %*% B, times = times)
+}
+
+# Range of the outer knots of an exponential smooth: the smallest and largest value of the standardised smooth
+# over constant smoothing rates (nr = number of rows of the rate design)
+.kex_exp <- function(y, nr, times){
+  one <- matrix(1, nrow = nr)
+  z_std <- function(a){
+    g <- expsmooth(y = y, Xi = one, beta = a, times = times)$d0
+    (g - mean(g)) / .sd_n(g)
+  }
+  rates <- qlogis(c(1e-4, 1 - 1e-4))
+  lo <- optimize(function(a) -min(z_std(a))^2, interval = rates)$objective
+  hi <- optimize(function(a) -max(z_std(a))^2, interval = rates)$objective
+  1.1 * c(-sqrt(-lo), sqrt(-hi))
 }

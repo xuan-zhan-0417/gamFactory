@@ -57,7 +57,7 @@
   alpha_w <- if( is.null(alpha) ) rep(0, na) else drop(solve(B, alpha))
 
   g <- drop( expsmooth(y = y_raw, Xi = W_rot, beta = alpha_w, times = times)$d0 )
-  if( is.null(alpha_scale) ){ alpha_scale <- log(1 / sd(g)) }   # sd(inner index) = 1 at the start
+  if( is.null(alpha_scale) ){ alpha_scale <- log(1 / .sd_n(g)) }   # sd(inner index) = 1 at the start
   gm <- mean(g)
 
   list(z = exp(alpha_scale) * (g - gm), y_raw = y_raw, W = W_rot, B = B, S = S_out, rank = rank_S,

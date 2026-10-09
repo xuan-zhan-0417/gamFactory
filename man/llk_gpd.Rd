@@ -7,19 +7,32 @@
 llk_gpd(y, param, deriv = 0, ...)
 }
 \arguments{
-\item{np}{XXX.}
+\item{y}{a vector of observations (non-negative).}
+
+\item{param}{a matrix (or list) with 2 columns (elements), containing \code{phi} and
+\code{xi}, in this order.}
+
+\item{deriv}{integer between 0 and 4 indicating the maximum derivative order to
+return: 0 only returns \code{d0} (the log-density itself), while 1-4
+additionally return \code{d1}-\code{d4}.}
 }
 \description{
-XXX.
+Log-likelihood of the Generalized Pareto Distribution (GPD), and its
+derivatives with respect to \code{param = cbind(phi, xi)}, where
+\code{xi} is the shape and \code{phi = sigma * (1 + xi)} is a
+reparametrisation of the scale \code{sigma} (chosen so that the
+parameters are close to orthogonal, see \code{\link{bundle_fam_gpd}}).
+Returned in the list format used by \code{\link{llk_gaussian}}
+and friends.
 }
 \examples{
 library(gamFactory)
 n <- 5
-param <- c(1.5, 0.3)
+param <- c(1.5, 0.3) # phi and xi
 y <- rexp(n)
 
-# Derivatives of Gaussian log-lik up to order 3
-llk_gpd(y = y, param = param, deriv = 3)
+# Derivatives of GPD log-lik up to order 4
+llk_gpd(y = y, param = param, deriv = 4)
 
 # Wrap derivatives for compatibility with gamFactory::checkDeriv
 obj <- list(
@@ -36,8 +49,11 @@ obj <- list(
   },
   "d3" = function(param){
     colSums(do.call("cbind", llk_gpd(y = y, param = param, deriv = 3)$d3))
+  },
+  "d4" = function(param){
+    colSums(do.call("cbind", llk_gpd(y = y, param = param, deriv = 4)$d4))
   })
 
-check_deriv(obj = obj, param = param, ord = 1:3)
+check_deriv(obj = obj, param = param, ord = 1:4)
 
 }

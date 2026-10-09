@@ -5,6 +5,8 @@
 #   .nest_with_par      which margins have inner parameters (all but plain ones)
 #   .nest_z             the indices of all margins as an n x K matrix
 #   .nest_evalX         the outer basis (1D or 2D) evaluated at those indices
+#   .sd_n               standard deviation dividing by n, as the penalty on the variance of the index does
+#   .nest_kex_default   range of the outer knots for margins without a range of their own (plain, si_nexp)
 
 .nest_bundle <- function(bundle_nam) do.call(bundle_nam, list())
 
@@ -48,4 +50,15 @@
   arg <- lapply(seq_len(ncol(z)), function(k) z[ , k])
   names(arg) <- colnames(z)
   do.call(basis$evalX, c(arg, list(deriv = deriv)))
+}
+
+.sd_n <- function(x) {
+  n <- length(x)
+  sd(x) * sqrt(n - 1) / sqrt(n)
+}
+
+# the range of z widened by 1, and at least (-6, 6)
+.nest_kex_default <- function(z) {
+  r <- range(z, na.rm = TRUE) + c(-1, 1)
+  if( r[1] < -6 || r[2] > 6 ) r else c(-6, 6)
 }

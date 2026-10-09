@@ -5,7 +5,7 @@
 #   .nest_pad_penalty   penalty on a block of inner parameters, padded into the full coefficient space
 
 # The downstream code works margin by margin, so it does not depend on the structure; these are the tested ones
-.nest_structures <- c("si", "exp", "mgks", "si_nexp",
+.nest_structures <- c("si", "si_pos", "exp", "mgks", "si_nexp",
                       "si|plain", "si|si", "si|exp", "exp|plain", "exp|exp", "mgks|plain")
 
 .nest_margin_types <- function(trans, data, term){
@@ -24,7 +24,7 @@
     if( is.null(trans[[k]]) ) detect(data[[ term[k] ]], k) else trans[[k]]$type
   }, character(1))
 
-  bad <- setdiff(mt, c("si", "exp", "mgks", "plain", "si_nexp"))
+  bad <- setdiff(mt, c("si", "si_pos", "exp", "mgks", "plain", "si_nexp"))
   if( length(bad) ){ stop("Unknown margin type(s): ", paste(bad, collapse = ", "), ".") }
   mt
 }

@@ -1,7 +1,7 @@
 #'
 #' Build linear predictors
 #' 
-#' @param eff list of effects, see e.g. [eff_stand] or [eff_si].
+#' @param eff list of effects, see e.g. [eff_stand] or [eff_nest].
 #' @param iel vectors indicating to which linear predictor each effect belongs to.
 #' @param iec list of vectors indicating which regression coefficients belong to each effect.
 #' 

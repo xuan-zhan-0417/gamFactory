@@ -2,17 +2,25 @@
 % Please edit documentation in R/fam_shash.R
 \name{fam_shash}
 \alias{fam_shash}
-\title{The Sinh-Arsinh (shash) regression model}
+\title{The Sinh-Arsinh (shash) location-scale-skewness-kurtosis family}
 \usage{
-fam_shash()
+fam_shash(link = NULL)
 }
 \description{
-The Sinh-Arsinh (shash) regression model
+\code{gam}/\code{gam_nl} should be called with a list of 4 formulae: the
+first specifies the response and the linear predictor for the location
+\code{mu}; the second (one sided) specifies the linear predictor for
+\code{tau = log(sigma)}, the log-scale; the third (one sided) specifies
+the linear predictor for the skewness \code{eps}; the fourth (one sided)
+specifies the linear predictor for \code{phi = log(delta)}, the
+log-kurtosis.
 }
 \examples{
 ###############
 # [1] Example with standard effects 
 ###############
+library(gamFactory)
+
 ##  Simulate some data from shash
 set.seed(847)
 n <- 1000
@@ -71,7 +79,6 @@ for(qq in c(0.001, 0.01, 0.1, 0.5, 0.9, 0.99, 0.999)){
   lines(x, true, type = 'l', col = 2, lwd = 2, lty = 2)
 }
 legend("topleft", c("estimated", "truth"), col = 1:2, lty = 1:2, lwd = 2)
-library(gamFactory)
 
 ###############
 # [2] Example with single index
