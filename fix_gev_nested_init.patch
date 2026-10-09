@@ -1,0 +1,94 @@
+Fix: gev (and any family whose initialize calls family$ll) fails with nested effects
+('subscript out of bounds'). The reduced designs built by .backfit_si_initialize contain only
+standard effects, so the bundle initialisation must get the standard family of the same bundle.
+Apply:   git apply fix_gev_nested_init.patch      Undo:   git apply -R fix_gev_nested_init.patch
+
+--- a/R/build_family_nl.R
++++ b/R/build_family_nl.R
+@@ -52,8 +52,10 @@
+     
+     n_init_use <- if ( called_by_initial_spg ) 1 else si_init$n_init
+ 
+-    .backfit_si_initialize(y = y, nobs = nobs, E = E, x = x, family = family, offset = offset,
+-                            weights = weights, info = info, n_init = n_init_use, n_eigen = si_init$n_eigen,
++    # the reduced designs used for the initialisation contain only standard effects, so the bundle
++    # initialisation gets the standard family (gevlss()$initialize, for instance, calls family$ll)
++    .backfit_si_initialize(y = y, nobs = nobs, E = E, x = x, family = family, family_std = build_family(bundle, link = Links)(),
++                            offset = offset, weights = weights, info = info, n_init = n_init_use, n_eigen = si_init$n_eigen,
+                             oversample = si_init$oversample, seed = si_init$seed)
+ 
+   }
+--- a/R/I_backfit_si_initialize.R
++++ b/R/I_backfit_si_initialize.R
+@@ -89,7 +89,7 @@
+ # test, and `reeval_idx` (the subset of `resolved` whose v may differ from the
+ # construction-time default and therefore need their outer basis recomputed - i.e. the
+ # "si" effects currently being searched, never other nested effects), build the
+-# reduced x/E/lpi handed to family$initialize_bundle():
++# reduced x/E/lpi handed to the bundle initialisation (family_std$initialize_internal()):
+ #  - effects in `reeval_idx` get their outer/basis columns overwritten via
+ #    basis$evalX(Xi %*% v)$X0, and their inner columns dropped;
+ #  - effects in `resolved` but not in `reeval_idx` (all other nested effects) keep their
+@@ -135,11 +135,12 @@
+ }
+ 
+ ########################
+-# Build the reduced design for the current `resolved` set, run family$initialize_bundle
++# Build the reduced design for the current `resolved` set, run the bundle initialisation
+ # on it, and scatter the result into a full-length coefficient vector (zero everywhere
+ # by default, so any not-yet-resolved "si" effect contributes exactly zero to the linear
+-# predictor - see eff_nest.R / linpreds.R).
+-.fit_reduced_si <- function(y, nobs, x, E, lpi, info, family, offset, weights, unscaled, nested_idx, resolved, reeval_idx) {
++# predictor - see eff_nest.R / linpreds.R). The reduced design contains only standard effects, hence
++# family_std (the standard family of the same bundle) is the one handed to the bundle initialisation.
++.fit_reduced_si <- function(y, nobs, x, E, lpi, info, family_std, offset, weights, unscaled, nested_idx, resolved, reeval_idx) {
+ 
+   reduced <- .build_reduced_design_for_si_init(x = x, E = E, lpi = lpi, info = info,
+                                                 nested_idx = nested_idx, resolved = resolved,
+@@ -147,9 +148,9 @@
+ 
+   attr(reduced$x, "lpi") <- reduced$lpi
+ 
+-  start_reduced <- family$initialize_bundle(y = y, nobs = nobs, E = reduced$E, x = reduced$x,
+-                                             family = family, offset = offset, jj = reduced$lpi,
+-                                             unscaled = unscaled, weights = weights)
++  start_reduced <- family_std$initialize_internal(y = y, nobs = nobs, E = reduced$E, x = reduced$x,
++                                                  family = family_std, offset = offset, jj = reduced$lpi,
++                                                  unscaled = unscaled, weights = weights)
+ 
+   start <- numeric( ncol(x) )
+   start[reduced$keep_idx] <- start_reduced
+@@ -169,13 +170,13 @@
+ ########################
+ # Top-level orchestrator: sequentially (one pass, no re-visits) resolve (i.e. find good initialitation for) 
+ # every effect made of one single index margin via a ~n_init-candidate search, scored by
+-# the exact model log-likelihood after fitting the remaining coefficients via family$initialize_bundle(). 
++# the exact model log-likelihood after fitting the remaining coefficients via the bundle initialisation.
+ # Other nested effects (exp, mgks, si_nexp, positive single indices, two margins) use the construction-time initialisation, alpha, 
+ # provided by the init function of their margin bundles (R/bundle_trans_*.R).
+ # NOTE: code is looking for initialisation alpha* = alpha + a0, so the returned start vector has alpha = alpha* - a0 for each effect.
+ #       The helper function .si_a0() returns a0 = 0 for the parameters of non single index margins, so the returned start vector has 
+ #       alpha = alpha* for those effect types.
+-.backfit_si_initialize <- function(y, nobs, E, x, family, offset, weights, info,
++.backfit_si_initialize <- function(y, nobs, E, x, family, family_std, offset, weights, info,
+                                     n_init = 1000, n_eigen = 10, oversample = 10, seed = 1) {
+ 
+   lpi <- attr(x, "lpi")
+@@ -219,7 +220,7 @@
+       resolved_try[[as.character(idx)]] <- cands[ii, ]
+ 
+       start_try <- .fit_reduced_si(y = y, nobs = nobs, x = x, E = E, lpi = lpi, info = info,
+-                                    family = family, offset = offset, weights = weights,
++                                    family_std = family_std, offset = offset, weights = weights,
+                                     unscaled = unscaled, nested_idx = nested_idx, resolved = resolved_try,
+                                     reeval_idx = si_search)
+ 
+@@ -235,7 +236,7 @@
+ 
+   }
+ 
+-  .fit_reduced_si(y = y, nobs = nobs, x = x, E = E, lpi = lpi, info = info, family = family,
++  .fit_reduced_si(y = y, nobs = nobs, x = x, E = E, lpi = lpi, info = info, family_std = family_std,
+                    offset = offset, weights = weights, unscaled = unscaled,
+                    nested_idx = nested_idx, resolved = resolved, reeval_idx = si_search)
+ 
